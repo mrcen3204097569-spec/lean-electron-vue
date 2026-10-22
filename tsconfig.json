@@ -2,27 +2,20 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": true,
+    "noImplicitAny": false,
     "jsx": "preserve",
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "lib": ["esnext", "dom", "dom.iterable"],
     "types": ["vite/client", "node"],
-    "baseUrl": ".",
     "paths": {
-      "@/*":["src/renderer/*"]
+      "@/*": ["./src/renderer/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "components.d.ts"]
 }

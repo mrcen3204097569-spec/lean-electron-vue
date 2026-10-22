@@ -28,7 +28,7 @@ export class WindowManage {
       win.restore()
     })
 
-    // 恢复窗口
+    // 关闭窗口
     ipcMain.handle('close-window', () => {
       win.close()
     })
@@ -64,14 +64,11 @@ export class WindowManage {
         frame: false,
         show: true,
         webPreferences: {
-          nodeIntegration: true,
-          webSecurity: false,
-          allowRunningInsecureContent: true,
+          nodeIntegration: false,
           contextIsolation: true,
           webviewTag: true,
           spellcheck: false,
           disableHtmlFullscreenWindowResize: true,
-          nativeWindowOpen: true,
           preload: ''
         }
       }

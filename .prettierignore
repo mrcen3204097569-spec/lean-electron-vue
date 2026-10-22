@@ -1,4 +1,9 @@
-/node_modules/**
-/dis/**
-/public/**
-/release/**
+node_modules
+dist
+release
+public
+pnpm-lock.yaml
+components.d.ts
+src/renderer/auto-imports.d.ts
+.eslintrc-auto-import.json
+*.md

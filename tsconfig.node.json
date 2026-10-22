@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
-    "composite": true,
+    "noEmit": true,
     "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
+    "strict": true,
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
   },
-  "include": ["vite.config.ts", "config/build.config.ts"]
+  "include": ["vite.config.mts", "plugins/**/*.mts", "config/**/*.mts"]
 }

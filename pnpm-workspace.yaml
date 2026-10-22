@@ -1,0 +1,8 @@
+# Allow esbuild to run its install script (Electron >= 45 downloads its binary lazily on first use)
+onlyBuiltDependencies:
+  - esbuild
+
+# Not needed by this template (sass file watcher / Squirrel installer)
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - electron-winstaller

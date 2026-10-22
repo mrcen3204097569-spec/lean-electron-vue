@@ -11,6 +11,7 @@ export const createDialog = (
 ): Promise<Window> => {
   return new Promise((resolve, reject) => {
     const windowProxy = window.open(url, '_blank', config ? JSON.stringify(config) : '{}')
+    if (!windowProxy) return reject(new Error('窗口打开失败'))
     const readyHandler = (e) => {
       const msg = e.data
       if (msg.msgName === `__dialogReady`) {

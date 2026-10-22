@@ -40,10 +40,6 @@ declare interface Window {
     onUnMaximizeWindow: (callback: Function) => void
   }
 
-  electronPathApi: {
-    getRootPath: (callback: (path: string) => void) => void
-  }
-
   /** 调试相关api */
   electronLogApi: {
     log(callback: Function): void

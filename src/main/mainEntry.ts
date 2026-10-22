@@ -1,7 +1,6 @@
 import { app, BrowserWindow } from 'electron'
-import { CustomScheme } from './use/CustomScheme'
-import * as path from 'path'
 import { join } from 'path'
+import { CustomScheme } from './use/CustomScheme'
 import { Updater } from './use/Updater'
 import { WindowManage } from './use/WindowManage'
 import { LogManage } from './use/LogManage'
@@ -22,25 +21,18 @@ app.whenReady().then(async () => {
       devTools: true,
       // 是否开启webview标签，开启后可在渲染进程使用<webview></webview>
       webviewTag: true,
-      // 集成node
-      nodeIntegration: true,
+      // 渲染进程不直接使用 node，所有能力都通过 preload 暴露
+      nodeIntegration: false,
       // 预加载js：用于暴露API给渲染进程
       preload: join(__dirname, '.', '/preload/main.preload.js')
     }
   })
 
-  // 生产环境 or 开发环境
+  // 开发环境：devPlugin 启动 electron 时会把 vite 服务地址作为第一个参数传入
   if (process.argv[2]) {
     // 打开开发工具栏
     mainWindow.loadURL(process.argv[2]).then(() => {
       mainWindow.webContents.openDevTools()
-
-      setTimeout(() => {
-        mainWindow.webContents.send(
-          'get-root-path',
-          app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath()
-        )
-      }, 3000)
     })
   } else {
     CustomScheme.registerScheme()

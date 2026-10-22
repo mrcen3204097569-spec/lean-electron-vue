@@ -1,13 +1,13 @@
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { devPlugin } from './plugins/devPlugin'
-import { buildPlugin } from './plugins/buildPlugin'
-import { resolve } from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { devPlugin } from './plugins/devPlugin.mts'
+import { buildPlugin } from './plugins/buildPlugin.mts'
 
-// https://vitejs.dev/config/
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -16,7 +16,7 @@ export default defineConfig({
     AutoImport({
       // 可以自定义文件生成的位置，默认是根目录下，使用ts的建议放src目录下
       dts: 'src/renderer/auto-imports.d.ts',
-      imports: ['vue', 'vue-router'],
+      imports: ['vue', 'vue-router', 'pinia'],
       resolvers: [ElementPlusResolver()],
       eslintrc: {
         enabled: true
@@ -28,7 +28,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': resolve(__dirname, '.', 'src/renderer')
+      '@': fileURLToPath(new URL('./src/renderer', import.meta.url))
     }
   },
   css: {
