@@ -1,6 +1,6 @@
 <div align="center">
 
-# vite-electron-template
+# lean-electron-vue
 
 开箱即用的 **Vite + Electron + Vue 3 + TypeScript** 桌面应用开发模板
 
@@ -50,8 +50,8 @@
 ### 安装与运行
 
 ```bash
-git clone https://github.com/GITHUB_USER/vite-electron-template.git
-cd vite-electron-template
+git clone https://github.com/mrcen3204097569-spec/lean-electron-vue.git
+cd lean-electron-vue
 
 pnpm install
 

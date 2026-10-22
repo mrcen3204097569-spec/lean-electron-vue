@@ -1,6 +1,6 @@
 <div align="center">
 
-# vite-electron-template
+# lean-electron-vue
 
 An out-of-the-box desktop app template built with **Vite + Electron + Vue 3 + TypeScript**
 
@@ -40,8 +40,8 @@ This template doesn't use a third-party integration such as `electron-vite` or `
 ### Install & Run
 
 ```bash
-git clone https://github.com/GITHUB_USER/vite-electron-template.git
-cd vite-electron-template
+git clone https://github.com/mrcen3204097569-spec/lean-electron-vue.git
+cd lean-electron-vue
 
 pnpm install
 
