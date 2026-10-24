@@ -30,7 +30,8 @@ This template doesn't use a third-party integration such as `electron-vite` or `
 - 🎨 **Element Plus** imported on demand, plus auto-imported `vue` / `vue-router` / `pinia` APIs
 - 🗂️ **Convention-based modules**: files in `router/modules/*.router.ts` and `api/modules/*.ts` are registered automatically
 - 🌐 **Axios wrapper** with request and response interceptors, error messages and offline detection
-- 🧹 **ESLint 9+ (flat config) + Prettier**, plus `vue-tsc` type checking
+- 🧹 **ESLint 10 (flat config) + Prettier**, plus `vue-tsc` type checking
+- 🔒 **Single instance**: launching the app again focuses the existing window. Package examples are Windows NSIS, macOS dmg, and Linux AppImage
 
 ## Getting Started
 
@@ -123,6 +124,10 @@ Every dependency lives in `devDependencies`. Vite bundles the renderer, and esbu
 ## Main / renderer IPC
 
 The preload bridge in `src/main/preload/main.preload.ts` does not forward `IpcRendererEvent`. Subscription methods return an unsubscribe function; call it from `onUnmounted`. Channel names and the API interfaces live in `src/shared/electronApi.ts` and are reused by the main process, the preload, and `src/renderer/types/electronRender.d.ts`.
+
+## Packaging
+
+`config/build.config.mts` sets the installer targets explicitly: NSIS on Windows, dmg on macOS, and AppImage on Linux. The app takes a single-instance lock. A second launch focuses the window that is already open instead of starting another process.
 
 ## Auto Update
 

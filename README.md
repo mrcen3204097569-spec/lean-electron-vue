@@ -30,7 +30,8 @@
 - 🎨 **Element Plus** 按需自动导入，`vue` / `vue-router` / `pinia` API 自动导入
 - 🗂️ **约定式模块**：`router/modules/*.router.ts`、`api/modules/*.ts` 自动注册
 - 🌐 **Axios 封装**：统一拦截、错误提示、断网检测
-- 🧹 **ESLint 9+ (flat config) + Prettier**，`vue-tsc` 类型检查
+- 🧹 **ESLint 10 (flat config) + Prettier**，`vue-tsc` 类型检查
+- 🔒 **单实例**：再次启动会聚焦已经打开的窗口。安装包示例为 Windows NSIS、macOS dmg、Linux AppImage
 
 ## 技术栈
 
@@ -222,7 +223,7 @@ dialogReady()
 
 ### 应用信息与图标
 
-在 `config/build.config.mts` 中修改 `productName`、`appId`、`nsis` 等配置。图标可参考 [electron-builder 文档](https://www.electron.build/icons) 放到 `build/` 目录，或在配置中单独指定。
+在 `config/build.config.mts` 中修改 `productName`、`appId`、`nsis` 等配置。当前示例目标是 Windows `nsis`、macOS `dmg`、Linux `AppImage`。图标可参考 [electron-builder 文档](https://www.electron.build/icons) 放到 `build/` 目录，或在配置中单独指定。应用持有单实例锁，第二次启动会把已有窗口还原到前台。
 
 ## 常见问题
 

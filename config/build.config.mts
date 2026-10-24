@@ -13,6 +13,9 @@ export const buildConfig = {
       productName: 'lean-electron-vue',
       appId: 'com.example.lean-electron-vue',
       asar: true,
+      win: {
+        target: ['nsis']
+      },
       nsis: {
         oneClick: false, // 是否一键安装
         allowElevation: true, // 允许请求提升。 如果为false，则用户必须使用提升的权限重新启动安装程序。
@@ -23,6 +26,14 @@ export const buildConfig = {
         createDesktopShortcut: true, // 创建桌面图标
         createStartMenuShortcut: true, // 创建开始菜单图标
         shortcutName: 'lean-electron-vue' // 图标名称
+      },
+      mac: {
+        target: ['dmg'],
+        category: 'public.app-category.developer-tools'
+      },
+      linux: {
+        target: ['AppImage'],
+        category: 'Utility'
       },
       // 生产环境的更新地址必须是 HTTPS。latest*.yml 和安装包走明文 HTTP 时，
       // 中间人可以替换更新说明和安装包。这里的 http://127.0.0.1 只是本机调试占位。
