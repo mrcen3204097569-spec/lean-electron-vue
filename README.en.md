@@ -117,6 +117,8 @@ Every dependency lives in `devDependencies`. Vite bundles the renderer, and esbu
 
 Only `app://` and the current dev-server origin may open inside the app. Other `http` / `https` URLs are passed to `shell.openExternal`, and every other scheme is denied. `will-navigate` and `will-redirect` use the same rule.
 
+Title-bar actions (show, minimize, maximize, restore, close) run on the window that sent the IPC, so a child window does not control the main window. Pages without the preload skip those calls instead of throwing.
+
 ## FAQ
 
 **My main-process changes don't take effect.** The main process is compiled only once, when `pnpm dev` starts. Restart `pnpm dev` after editing `src/main`.

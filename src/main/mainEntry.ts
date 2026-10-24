@@ -47,7 +47,7 @@ app.whenReady().then(async () => {
   LogManage.regMainWidow(mainWindow)
 
   // 窗口事件注册：ipcMain事件注册
-  WindowManage.regWindowIpcMainEvent(mainWindow)
+  WindowManage.regWindowIpcMainEvent()
 
   // 窗口管理：窗口事件注册
   WindowManage.regWindowEvent(mainWindow)

@@ -2,6 +2,7 @@ import {
   app,
   BrowserWindow,
   BrowserWindowConstructorOptions,
+  IpcMainInvokeEvent,
   WebContents,
   ipcMain,
   shell
@@ -111,35 +112,36 @@ function attachNavigationGuards(contents: WebContents) {
   })
 }
 
+function windowFromEvent(event: IpcMainInvokeEvent): BrowserWindow | null {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (!win || win.isDestroyed()) return null
+  return win
+}
+
 export class WindowManage {
   /**
-   * 注册IpcMain （主进程）事件
-   * @param win
+   * 窗口控制绑定到发送 IPC 的窗口，而不是创建时传入的主窗口。
+   * 这样子窗口标题栏不会误关主窗口。
    */
-  static regWindowIpcMainEvent(win: BrowserWindow) {
-    // 首次显示
-    ipcMain.handle('show-main-window', () => {
-      win.show()
+  static regWindowIpcMainEvent() {
+    ipcMain.handle('show-main-window', (event) => {
+      windowFromEvent(event)?.show()
     })
 
-    // 最大化窗口
-    ipcMain.handle('maximize-window', () => {
-      win.maximize()
+    ipcMain.handle('maximize-window', (event) => {
+      windowFromEvent(event)?.maximize()
     })
 
-    // 最小化窗口
-    ipcMain.handle('minimize-window', () => {
-      win.minimize()
+    ipcMain.handle('minimize-window', (event) => {
+      windowFromEvent(event)?.minimize()
     })
 
-    // 恢复窗口
-    ipcMain.handle('restore-window', () => {
-      win.restore()
+    ipcMain.handle('restore-window', (event) => {
+      windowFromEvent(event)?.restore()
     })
 
-    // 关闭窗口
-    ipcMain.handle('close-window', () => {
-      win.close()
+    ipcMain.handle('close-window', (event) => {
+      windowFromEvent(event)?.close()
     })
   }
 

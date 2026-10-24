@@ -35,36 +35,36 @@ const windowIsMax = ref(false)
  * 最大化窗口
  */
 const maximizeWindow = () => {
-  window.electronWindowApi.maximizeWindow()
+  window.electronWindowApi?.maximizeWindow()
 }
 
 /**
  * 最小化窗口
  */
 const minimizeWindow = () => {
-  window.electronWindowApi.minimizeWindow()
+  window.electronWindowApi?.minimizeWindow()
 }
 
 /**
  * 恢复窗口
  */
 const restoreWindow = () => {
-  window.electronWindowApi.restoreWindow()
+  window.electronWindowApi?.restoreWindow()
 }
 
 /**
  * 关闭窗口
  */
 const closeWindow = () => {
-  window.electronWindowApi.closeWindow()
+  window.electronWindowApi?.closeWindow()
 }
 
 onMounted(() => {
-  window.electronWindowApi.onMaximizeWindow(() => {
+  window.electronWindowApi?.onMaximizeWindow(() => {
     windowIsMax.value = true
   })
 
-  window.electronWindowApi.onUnMaximizeWindow(() => {
+  window.electronWindowApi?.onUnMaximizeWindow(() => {
     windowIsMax.value = false
   })
 })

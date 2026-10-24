@@ -63,22 +63,22 @@ const downPercentage = ref(0)
 
 const updateCheck = () => {
   // 询问是否需要更新
-  window.electronAppUpdateApi.updateCheck()
+  window.electronAppUpdateApi?.updateCheck()
 }
 
 const downStart = () => {
   // 下载开始
-  window.electronAppUpdateApi.downStart()
+  window.electronAppUpdateApi?.downStart()
 }
 
 const appInstall = () => {
   // 安装app
-  window.electronAppUpdateApi.appInstall()
+  window.electronAppUpdateApi?.appInstall()
 }
 
 onMounted(() => {
   // 监听验证更新结果
-  window.electronAppUpdateApi.validateUpdateNotice(
+  window.electronAppUpdateApi?.validateUpdateNotice(
     (
       event,
       info: { version: string; updateTitle: string; updateSubTitle: string; updateContent: string }
@@ -95,14 +95,14 @@ onMounted(() => {
   )
 
   // 下载中ing
-  window.electronAppUpdateApi.downProgress((event, info) => {
+  window.electronAppUpdateApi?.downProgress((event, info) => {
     console.log('下载中ing：', event, info)
     status.value = EUpdateStatus.DOWN_ING
     downPercentage.value = info.percent
   })
 
   // 下载结束
-  window.electronAppUpdateApi.downComplete(() => {
+  window.electronAppUpdateApi?.downComplete(() => {
     console.log('下载结束')
     status.value = EUpdateStatus.DOWN_END
   })

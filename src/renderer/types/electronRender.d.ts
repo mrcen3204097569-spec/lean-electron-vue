@@ -6,8 +6,8 @@
  * 扩展 Window 对象
  */
 declare interface Window {
-  /** app更新相关api */
-  electronAppUpdateApi: {
+  /** app更新相关api。未注入 preload 的子窗口上不存在。 */
+  electronAppUpdateApi?: {
     /** 下载进度 */
     downProgress(callback: Function): void
     /** 下载完成 */
@@ -22,8 +22,8 @@ declare interface Window {
     validateUpdateNotice(callback: Function): void
   }
 
-  /** 窗口相关api */
-  electronWindowApi: {
+  /** 窗口相关api。未注入 preload 的子窗口上不存在。 */
+  electronWindowApi?: {
     /** 显示主窗口 */
     showMainWindow(): void
     /** 最大化窗口 */
@@ -40,8 +40,8 @@ declare interface Window {
     onUnMaximizeWindow: (callback: Function) => void
   }
 
-  /** 调试相关api */
-  electronLogApi: {
+  /** 调试相关api。未注入 preload 的子窗口上不存在。 */
+  electronLogApi?: {
     log(callback: Function): void
   }
 }
