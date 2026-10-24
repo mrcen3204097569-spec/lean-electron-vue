@@ -27,13 +27,25 @@ function signalTree(child: ChildProcess, signalName: NodeJS.Signals) {
 function waitForExit(child: ChildProcess): Promise<void> {
   if (child.exitCode !== null || child.signalCode !== null) return Promise.resolve()
   return new Promise((resolve) => {
+    let settled = false
+    const done = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      clearTimeout(fallback)
+      resolve()
+    }
     const timer = setTimeout(() => {
       signalTree(child, 'SIGKILL')
+      // SIGKILL 之后如果没再收到 exit，也不能把重启永远挂住。
+      fallback = setTimeout(done, 500)
     }, 2000)
-    child.once('exit', () => {
-      clearTimeout(timer)
-      resolve()
-    })
+    let fallback: ReturnType<typeof setTimeout> | undefined
+    child.once('exit', done)
+    if (child.exitCode !== null || child.signalCode !== null) {
+      done()
+      return
+    }
     signalTree(child, 'SIGTERM')
   })
 }
