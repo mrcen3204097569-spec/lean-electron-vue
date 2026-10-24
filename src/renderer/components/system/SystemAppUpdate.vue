@@ -6,12 +6,12 @@
     <div v-if="status !== EUpdateStatus.NOT_UPDATE" class="c-system-app-update">
       <div class="animate__animated animate__zoomIn box">
         <div class="head">
-          <div class="head__title" v-html="title"></div>
+          <div class="head__title">{{ title }}</div>
           <div class="head__version">{{ version ? `v.${version}` : '' }}</div>
         </div>
         <div class="content">
-          <div class="content__subtitle" v-html="subTitle"></div>
-          <div class="content__info" v-html="content"></div>
+          <div class="content__subtitle">{{ subTitle }}</div>
+          <div class="content__info">{{ content }}</div>
         </div>
 
         <!--有更新，等待手动点击更新-->
@@ -149,6 +149,7 @@ onMounted(() => {
 
     .head__title {
       font-size: 1.3rem;
+      overflow-wrap: anywhere;
     }
 
     .head__version {
@@ -170,6 +171,7 @@ onMounted(() => {
     .content__subtitle {
       font-weight: 600;
       padding: 0.5rem;
+      overflow-wrap: anywhere;
     }
 
     .content__info {
@@ -178,6 +180,8 @@ onMounted(() => {
       justify-content: center;
       align-items: center;
       color: $themeBase;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
   }
 

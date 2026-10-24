@@ -41,7 +41,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       'vue/multi-word-component-names': 'off',
-      'vue/no-v-html': 'off'
+      'vue/no-v-html': 'error'
     }
   },
   prettierRecommended
