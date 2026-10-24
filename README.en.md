@@ -15,7 +15,9 @@ An out-of-the-box desktop app template built with **Vite + Electron + Vue 3 + Ty
 This template doesn't use a third-party integration such as `electron-vite` or `vite-plugin-electron`. Two small custom Vite plugins connect Vite and Electron, so the whole build pipeline is a few dozen lines of code that you can read and change.
 
 - `pnpm dev`: starts the Vite dev server, compiles the main process with esbuild, then launches Electron. The dev server URL is passed in `VITE_DEV_SERVER_URL`. The renderer supports HMR.
-- `pnpm build`: builds the renderer, compiles the main process and runs electron-builder to produce an installer, all in one command.
+- `pnpm build`: builds the renderer and the main process into a runnable `dist/`. It does not run electron-builder.
+- `pnpm dist`: runs that build and then electron-builder.
+- `pnpm test`: runs Vitest unit tests for the `app://` path guard, update-note YAML, window policy, and CSP.
 
 ## Features
 
@@ -48,8 +50,14 @@ pnpm install
 # development
 pnpm dev
 
-# build the installer (output: release/)
+# build the app (dist/, no installer)
 pnpm build
+
+# package the installer (output: release/)
+pnpm dist
+
+# unit tests
+pnpm test
 ```
 
 > [!NOTE]
@@ -60,10 +68,14 @@ pnpm build
 | Command                       | Description                                 |
 | ----------------------------- | ------------------------------------------- |
 | `pnpm dev`                    | Start the dev environment (Vite + Electron) |
-| `pnpm build`                  | Build and package the installer             |
+| `pnpm build`                  | Build the app without packaging             |
+| `pnpm dist`                   | Build and package an installer into `release/` |
+| `pnpm test`                   | Run the Vitest unit tests                   |
 | `pnpm typecheck`              | Type-check with `vue-tsc`                   |
 | `pnpm lint` / `pnpm lint:fix` | Lint / auto-fix with ESLint                 |
 | `pnpm format`                 | Format with Prettier                        |
+
+GitHub Actions runs `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` on pushes and pull requests. The Windows / macOS / Linux packaging matrix runs only on manual dispatch or a `v*` tag.
 
 ## Project Structure
 
@@ -95,17 +107,24 @@ pnpm build
   └─ vite build (renderer → dist/)
        └─ buildPlugin (closeBundle hook)
             ├─ esbuild main process → dist/mainEntry.js
-            ├─ write a minimal dist/package.json
-            ├─ electron-builder → release/
-            └─ append update notes to release/latest*.yml as YAML double-quoted scalars
+            └─ write a minimal dist/package.json
+
+pnpm dist
+  └─ the same build with ELECTRON_PACKAGE=1
+       ├─ electron-builder → release/
+       └─ append update notes to release/latest*.yml as YAML double-quoted scalars
 ```
 
 Every dependency lives in `devDependencies`. Vite bundles the renderer, and esbuild bundles the main process (including `electron-updater`) into `mainEntry.js`. The installer therefore ships without `node_modules`.
 
+## Main / renderer IPC
+
+The preload bridge in `src/main/preload/main.preload.ts` does not forward `IpcRendererEvent`. Subscription methods return an unsubscribe function; call it from `onUnmounted`. Channel names and the API interfaces live in `src/shared/electronApi.ts` and are reused by the main process, the preload, and `src/renderer/types/electronRender.d.ts`.
+
 ## Auto Update
 
 1. Set `publish.url` in `config/build.config.mts` to your update server. Production feeds must use **HTTPS**. An HTTP feed lets a network attacker replace `latest*.yml` and the installer. The bundled `http://127.0.0.1` value is only a local placeholder. `updateMsg` is plain text (newlines are kept) and is not rendered as HTML.
-2. Bump `version` in `package.json` and run `pnpm build`.
+2. Bump `version` in `package.json` and run `pnpm dist`.
 3. Upload the installer, its `.blockmap` and `latest*.yml` from `release/` to the server.
 4. On startup, older versions check for updates and show the update dialog.
 

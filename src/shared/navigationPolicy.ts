@@ -189,7 +189,7 @@ export function parseWindowFeatures(features: string): unknown {
   if (typeof features !== 'string') return {}
   const trimmed = features.trim()
   if (!trimmed || trimmed.length > MAX_FEATURE_LENGTH) return {}
-  if (trimmed.startsWith('{')) {
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     try {
       return JSON.parse(trimmed) as unknown
     } catch {

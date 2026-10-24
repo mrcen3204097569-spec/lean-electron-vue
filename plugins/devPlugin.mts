@@ -9,6 +9,8 @@ export const devPlugin = (): Plugin => {
     apply: 'serve',
 
     configureServer(server) {
+      if (process.env.VITEST) return
+
       // 编译入口文件
       buildMainProcess()
 

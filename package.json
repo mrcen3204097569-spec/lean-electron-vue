@@ -22,6 +22,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "dist": "node ./scripts/dist.mjs",
+    "test": "vitest run",
     "typecheck": "vue-tsc --noEmit && vue-tsc --noEmit -p tsconfig.node.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "@eslint/js": "^10.0.1",
+    "@types/js-yaml": "4.0.9",
     "@types/node": "^24.0.0",
     "@types/qs": "^6.15.1",
     "@vitejs/plugin-vue": "^6.0.10",
@@ -45,6 +48,7 @@
     "eslint-plugin-prettier": "^5.5.7",
     "eslint-plugin-vue": "^10.11.1",
     "globals": "^17.13.0",
+    "js-yaml": "^5.5.0",
     "pinia": "^4.1.0",
     "prettier": "^3.9.10",
     "qs": "^6.16.1",
@@ -54,6 +58,7 @@
     "unplugin-auto-import": "^21.1.0",
     "unplugin-vue-components": "^32.1.0",
     "vite": "^8.3.5",
+    "vitest": "^5.0.5",
     "vue": "^3.5.44",
     "vue-eslint-parser": "^10.4.1",
     "vue-router": "^5.4.0",

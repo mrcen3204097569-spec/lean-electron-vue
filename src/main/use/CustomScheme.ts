@@ -1,6 +1,6 @@
 import { net, protocol } from 'electron'
-import * as path from 'path'
 import { pathToFileURL } from 'url'
+import { resolveAppFile } from '../../shared/appProtocolPath'
 import { buildContentSecurityPolicy } from '../../shared/contentSecurityPolicy'
 
 // 为自定义的app协议提供特权（必须在 app ready 之前调用）
@@ -20,16 +20,16 @@ export class CustomScheme {
   // 注册自定义app协议
   static registerScheme() {
     protocol.handle('app', (request) => {
-      let pathName = decodeURIComponent(new URL(request.url).pathname)
-
-      // 没有扩展名的路径（前端路由）统一返回 index.html
-      if (path.extname(pathName) === '') {
-        pathName = 'index.html'
+      let pathName: string
+      try {
+        pathName = decodeURIComponent(new URL(request.url).pathname)
+      } catch {
+        return new Response('Bad Request', { status: 400 })
       }
 
-      // 防止通过 ../ 访问应用目录之外的文件
-      const tarFile = path.join(__dirname, pathName)
-      if (path.relative(__dirname, tarFile).startsWith('..')) {
+      // 没有扩展名的路径（前端路由）会落到 index.html。越界路径返回 404。
+      const tarFile = resolveAppFile(__dirname, pathName)
+      if (!tarFile) {
         return new Response('Not Found', { status: 404 })
       }
 

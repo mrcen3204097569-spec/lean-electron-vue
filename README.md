@@ -15,7 +15,9 @@
 一个不依赖 `electron-vite`、`vite-plugin-electron` 等第三方集成方案的 Electron 模板：通过两个很薄的自定义 Vite 插件把 Vite 和 Electron 串起来，整个构建流程只有几十行代码，**看得懂、改得动**。
 
 - `pnpm dev`：启动 Vite 开发服务器，用 esbuild 编译主进程后自动拉起 Electron，开发服务器地址通过环境变量 `VITE_DEV_SERVER_URL` 传入。渲染进程支持 HMR
-- `pnpm build`：构建渲染进程 → 编译主进程 → 调用 electron-builder 生成安装包，一条命令完成
+- `pnpm build`：构建渲染进程并编译主进程，产出可运行的 `dist/`，不调用 electron-builder
+- `pnpm dist`：在 `pnpm build` 的基础上调用 electron-builder 生成安装包
+- `pnpm test`：用 Vitest 跑纯逻辑单测（`app://` 路径校验、更新说明 YAML、窗口策略、CSP）
 
 ## 特性
 
@@ -58,8 +60,14 @@ pnpm install
 # 开发模式
 pnpm dev
 
-# 打包安装包（输出到 release/）
+# 构建应用（dist/，不打安装包）
 pnpm build
+
+# 打包安装包（输出到 release/）
+pnpm dist
+
+# 单元测试
+pnpm test
 ```
 
 > [!TIP]
@@ -80,10 +88,14 @@ pnpm build
 | 命令                          | 说明                            |
 | ----------------------------- | ------------------------------- |
 | `pnpm dev`                    | 启动开发环境（Vite + Electron） |
-| `pnpm build`                  | 构建并打包安装包                |
+| `pnpm build`                  | 构建应用，不打安装包            |
+| `pnpm dist`                   | 构建并打包安装包到 `release/`   |
+| `pnpm test`                   | 运行 Vitest 单元测试            |
 | `pnpm typecheck`              | 使用 `vue-tsc` 做类型检查       |
 | `pnpm lint` / `pnpm lint:fix` | ESLint 检查 / 自动修复          |
 | `pnpm format`                 | Prettier 格式化                 |
+
+GitHub Actions 在 push 和 pull request 上运行 `pnpm lint`、`pnpm typecheck`、`pnpm test` 和 `pnpm build`。Windows / macOS / Linux 安装包矩阵只在手动触发或推送 `v*` tag 时运行。
 
 ## 目录结构
 
@@ -94,6 +106,8 @@ pnpm build
 │   ├── devPlugin.mts          # 开发：编译主进程并启动 Electron
 │   ├── buildPlugin.mts        # 构建：编译主进程、生成 package.json、调用 electron-builder
 │   └── mainProcess.mts        # esbuild 编译主进程 / preload 的公共逻辑
+├── tests/                     # Vitest 纯逻辑单测
+├── .github/                   # CI 与 Dependabot
 ├── public/                    # 静态资源
 ├── src/
 │   ├── main/                  # 主进程
@@ -132,9 +146,12 @@ pnpm build
   └─ vite build（渲染进程 → dist/）
        └─ buildPlugin（closeBundle 钩子）
             ├─ esbuild 编译主进程 → dist/mainEntry.js
-            ├─ 生成精简的 dist/package.json
-            ├─ electron-builder 打包 → release/
-            └─ 把更新文案按 YAML 双引号标量追加写入 release/latest*.yml
+            └─ 生成精简的 dist/package.json
+
+pnpm dist
+  └─ 同上，并设置 ELECTRON_PACKAGE=1
+       ├─ electron-builder 打包 → release/
+       └─ 把更新文案按 YAML 双引号标量追加写入 release/latest*.yml
 ```
 
 所有依赖都放在 `devDependencies` 中：渲染进程代码由 Vite 打包，主进程代码（包括 `electron-updater`）由 esbuild 打包进 `mainEntry.js`，因此安装包里不需要 `node_modules`，体积更小。
@@ -158,12 +175,12 @@ ipcMain.handle('maximize-window', () => win.maximize())
 window.electronWindowApi.maximizeWindow()
 ```
 
-新增 API 后，记得在 `src/renderer/types/electronRender.d.ts` 中补充类型声明。
+监听类 API 不把 `IpcRendererEvent` 传给渲染进程，并返回取消订阅函数，在 `onUnmounted` 里调用。通道名和接口定义在 `src/shared/electronApi.ts`，`src/renderer/types/electronRender.d.ts` 引用同一份类型。新增 API 时改这一处，并在 preload 里实现对应接口。
 
 ### 自动更新
 
 1. 修改 `config/build.config.mts` 中的 `publish.url` 为你的更新服务器地址。生产环境必须使用 **HTTPS**：`latest*.yml` 和安装包走明文 HTTP 时，中间人可以替换更新说明和安装包。配置里的 `http://127.0.0.1` 只用于本机调试。`updateMsg` 是纯文本（保留换行），弹窗不会把它当 HTML 渲染
-2. 提升 `package.json` 中的 `version`，执行 `pnpm build`
+2. 提升 `package.json` 中的 `version`，执行 `pnpm dist`
 3. 把 `release/` 目录下的安装包、`.blockmap` 和 `latest*.yml` 上传到更新服务器
 4. 旧版本应用启动时会自动检查更新，并弹出 `SystemAppUpdate` 更新弹窗
 
