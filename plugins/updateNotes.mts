@@ -16,3 +16,10 @@ export function formatUpdateNotesYaml(notes: UpdateNotes): string {
     ''
   ].join('\n')
 }
+
+/** 接到已有 latest*.yml 后面。原文末尾没有换行时先补一行，避免把最后一个字段粘在一起。 */
+export function joinUpdateNotes(existing: string, notes: UpdateNotes): string {
+  const notesYaml = formatUpdateNotesYaml(notes)
+  if (existing.length === 0 || existing.endsWith('\n')) return existing + notesYaml
+  return `${existing}\n${notesYaml}`
+}

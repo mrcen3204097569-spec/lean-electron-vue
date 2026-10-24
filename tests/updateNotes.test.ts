@@ -1,6 +1,6 @@
 import { load } from 'js-yaml'
 import { describe, expect, it } from 'vitest'
-import { formatUpdateNotesYaml } from '../plugins/updateNotes.mts'
+import { formatUpdateNotesYaml, joinUpdateNotes } from '../plugins/updateNotes.mts'
 
 const sampleLatestYml = `version: 2.0.0
 files:
@@ -31,5 +31,17 @@ describe('formatUpdateNotesYaml', () => {
     expect(document.updateContent).toBe(notes.content)
     expect(document.updateEvil).toBeUndefined()
     expect(formatUpdateNotesYaml(notes).includes('\nupdateEvil:')).toBe(false)
+  })
+
+  it('inserts a newline when the existing document does not end with one', () => {
+    const existing = 'sha512: abc'
+    const joined = joinUpdateNotes(existing, {
+      title: 't',
+      subTitle: 's',
+      content: 'c'
+    })
+    const document = load(joined) as { sha512: string; updateTitle: string }
+    expect(document.sha512).toBe('abc')
+    expect(document.updateTitle).toBe('t')
   })
 })

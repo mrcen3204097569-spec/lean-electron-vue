@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import type { Plugin } from 'vite'
 import { buildConfig } from '../config/build.config.mts'
 import { buildMainProcess } from './mainProcess.mts'
-import { formatUpdateNotesYaml } from './updateNotes.mts'
+import { joinUpdateNotes } from './updateNotes.mts'
 
 const require = createRequire(import.meta.url)
 
@@ -40,10 +40,9 @@ class BuildObj {
     const { title, subTitle, content } = buildConfig.updateMsg
     for (const file of fs.readdirSync(releaseDir)) {
       if (!/^latest.*\.yml$/.test(file)) continue
-      fs.appendFileSync(
-        path.join(releaseDir, file),
-        formatUpdateNotesYaml({ title, subTitle, content })
-      )
+      const yamlPath = path.join(releaseDir, file)
+      const existing = fs.readFileSync(yamlPath, 'utf8')
+      fs.writeFileSync(yamlPath, joinUpdateNotes(existing, { title, subTitle, content }))
       console.log(`${file} 写入更新信息成功！`)
     }
 

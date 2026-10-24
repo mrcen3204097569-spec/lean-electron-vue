@@ -199,7 +199,7 @@ import { createDialog, dialogReady } from '@/common/dialog'
 const win = await createDialog('/test', {
   width: 800,
   height: 600,
-  modal: true, // 模态窗口会自动把主窗口设为 parent
+  modal: true, // 父窗口是发起 window.open 的那个窗口
   webPreferences: { preloadMain: true } as any // 是否注入主窗口的 preload
 })
 

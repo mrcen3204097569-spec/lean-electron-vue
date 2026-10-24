@@ -140,7 +140,7 @@ The preload bridge in `src/main/preload/main.preload.ts` does not forward `IpcRe
 
 ## Child Windows
 
-`createDialog()` still JSON-stringifies a `BrowserWindow` options object into `window.open` features. The main process keeps only safe window options. `webPreferences` is ignored except `preloadMain: true`, which loads the built-in preload. Otherwise the child gets an empty preload so it does not inherit the main window's privileged bridge.
+`createDialog()` still JSON-stringifies a `BrowserWindow` options object into `window.open` features. The main process keeps only safe window options. `webPreferences` is ignored except `preloadMain: true`, which loads the built-in preload. Otherwise the child gets an empty preload so it does not inherit the main window's privileged bridge. `modal: true` parents the child to the window that called `window.open`.
 
 Only `app://` and the current dev-server origin may open inside the app. Other `http` / `https` URLs are passed to `shell.openExternal`, and every other scheme is denied. `will-navigate` and `will-redirect` use the same rule.
 
