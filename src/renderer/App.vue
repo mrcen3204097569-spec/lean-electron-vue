@@ -31,6 +31,17 @@ const route = useRoute()
 const title = computed(() => {
   return route.name as string
 })
+
+const stopLog = ref<(() => void) | null>(null)
+
+onMounted(() => {
+  stopLog.value = window.electronLogApi?.log((text) => console.log(text)) ?? null
+})
+
+onUnmounted(() => {
+  stopLog.value?.()
+  stopLog.value = null
+})
 </script>
 
 <style scoped lang="scss">

@@ -6,12 +6,12 @@
     <div v-if="status !== EUpdateStatus.NOT_UPDATE" class="c-system-app-update">
       <div class="animate__animated animate__zoomIn box">
         <div class="head">
-          <div class="head__title" v-html="title"></div>
+          <div class="head__title">{{ title }}</div>
           <div class="head__version">{{ version ? `v.${version}` : '' }}</div>
         </div>
         <div class="content">
-          <div class="content__subtitle" v-html="subTitle"></div>
-          <div class="content__info" v-html="content"></div>
+          <div class="content__subtitle">{{ subTitle }}</div>
+          <div class="content__info">{{ content }}</div>
         </div>
 
         <!--有更新，等待手动点击更新-->
@@ -60,55 +60,61 @@ const version = ref('')
 const content = ref('')
 
 const downPercentage = ref(0)
+const stops: Array<() => void> = []
 
 const updateCheck = () => {
   // 询问是否需要更新
-  window.electronAppUpdateApi.updateCheck()
+  window.electronAppUpdateApi?.updateCheck()
 }
 
 const downStart = () => {
   // 下载开始
-  window.electronAppUpdateApi.downStart()
+  window.electronAppUpdateApi?.downStart()
 }
 
 const appInstall = () => {
   // 安装app
-  window.electronAppUpdateApi.appInstall()
+  window.electronAppUpdateApi?.appInstall()
 }
 
 onMounted(() => {
-  // 监听验证更新结果
-  window.electronAppUpdateApi.validateUpdateNotice(
-    (
-      event,
-      info: { version: string; updateTitle: string; updateSubTitle: string; updateContent: string }
-    ) => {
+  const api = window.electronAppUpdateApi
+  if (!api) return
+
+  stops.push(
+    api.validateUpdateNotice((info) => {
       console.log('更新验证结果：', info)
       if (info) {
         status.value = EUpdateStatus.WAIT_UPDATE
-        title.value = info.updateTitle
-        subTitle.value = info.updateSubTitle
-        content.value = info.updateContent
+        title.value = info.updateTitle ?? ''
+        subTitle.value = info.updateSubTitle ?? ''
+        content.value = info.updateContent ?? ''
         version.value = info.version
       }
-    }
+    })
   )
 
-  // 下载中ing
-  window.electronAppUpdateApi.downProgress((event, info) => {
-    console.log('下载中ing：', event, info)
-    status.value = EUpdateStatus.DOWN_ING
-    downPercentage.value = info.percent
-  })
+  stops.push(
+    api.downProgress((info) => {
+      console.log('下载中ing：', info)
+      status.value = EUpdateStatus.DOWN_ING
+      downPercentage.value = info.percent
+    })
+  )
 
-  // 下载结束
-  window.electronAppUpdateApi.downComplete(() => {
-    console.log('下载结束')
-    status.value = EUpdateStatus.DOWN_END
-  })
+  stops.push(
+    api.downComplete(() => {
+      console.log('下载结束')
+      status.value = EUpdateStatus.DOWN_END
+    })
+  )
 
-  // 询问是否需要更新
   updateCheck()
+})
+
+onUnmounted(() => {
+  for (const stop of stops) stop()
+  stops.length = 0
 })
 </script>
 
@@ -149,6 +155,7 @@ onMounted(() => {
 
     .head__title {
       font-size: 1.3rem;
+      overflow-wrap: anywhere;
     }
 
     .head__version {
@@ -170,6 +177,7 @@ onMounted(() => {
     .content__subtitle {
       font-weight: 600;
       padding: 0.5rem;
+      overflow-wrap: anywhere;
     }
 
     .content__info {
@@ -178,6 +186,8 @@ onMounted(() => {
       justify-content: center;
       align-items: center;
       color: $themeBase;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
   }
 

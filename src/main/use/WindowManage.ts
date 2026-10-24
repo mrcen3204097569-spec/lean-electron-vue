@@ -1,36 +1,161 @@
-import { BrowserWindow, BrowserWindowConstructorOptions, ipcMain } from 'electron'
-import { LogManage } from './LogManage'
+import {
+  app,
+  BrowserWindow,
+  BrowserWindowConstructorOptions,
+  IpcMainInvokeEvent,
+  WebContents,
+  ipcMain,
+  shell
+} from 'electron'
 import { join } from 'path'
+import { IpcChannel } from '../../shared/electronApi'
+import {
+  decideNavigation,
+  parseWindowFeatures,
+  sanitizeWindowFeatures
+} from '../../shared/navigationPolicy'
+import { getDevServerUrl } from './devServerUrl'
+import { LogManage } from './LogManage'
+
+const MAIN_PRELOAD = join(__dirname, 'preload', 'main.preload.js')
+const EMPTY_PRELOAD = join(__dirname, 'preload', 'empty.preload.js')
+
+/**
+ * 子窗口的 webPreferences 全部在这里写死。
+ * setWindowOpenHandler 的 override 优先级高于父窗口继承值和 features 字符串，
+ * 所以危险项必须显式设成安全值，不能从渲染进程合并进来。
+ */
+function secureWebPreferences(
+  preloadMain: boolean
+): BrowserWindowConstructorOptions['webPreferences'] {
+  return {
+    preload: preloadMain ? MAIN_PRELOAD : EMPTY_PRELOAD,
+    nodeIntegration: false,
+    nodeIntegrationInWorker: false,
+    nodeIntegrationInSubFrames: false,
+    contextIsolation: true,
+    sandbox: true,
+    webviewTag: false,
+    webSecurity: true,
+    allowRunningInsecureContent: false,
+    experimentalFeatures: false,
+    spellcheck: false,
+    disableHtmlFullscreenWindowResize: true,
+    devTools: !app.isPackaged
+  }
+}
+
+function openExternal(url: string) {
+  shell.openExternal(url).catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : String(error)
+    LogManage.log(`打开外部链接失败：${message}`)
+  })
+}
+
+function childWindowOptions(
+  opener: WebContents,
+  features: string
+): BrowserWindowConstructorOptions {
+  const requested = sanitizeWindowFeatures(parseWindowFeatures(features))
+  const windowOptions: BrowserWindowConstructorOptions = {
+    show: true,
+    ...requested.options,
+    frame: false,
+    webPreferences: secureWebPreferences(requested.preloadMain)
+  }
+
+  if (windowOptions.modal) {
+    const parent = BrowserWindow.fromWebContents(opener)
+    if (parent && !parent.isDestroyed()) {
+      windowOptions.parent = parent
+    } else {
+      windowOptions.modal = false
+    }
+  }
+
+  return windowOptions
+}
+
+function attachNavigationGuards(contents: WebContents) {
+  const decisionFor = (url: string) => decideNavigation(url, getDevServerUrl())
+
+  contents.on('will-navigate', (event, url) => {
+    const decision = decisionFor(url)
+    if (decision === 'allow') return
+    event.preventDefault()
+    if (decision === 'external') openExternal(url)
+    else LogManage.log(`已拦截跳转：${url}`)
+  })
+
+  contents.on('will-redirect', (event, url) => {
+    if (decisionFor(url) === 'allow') return
+    event.preventDefault()
+    LogManage.log(`已拦截重定向：${url}`)
+  })
+
+  contents.setWindowOpenHandler((details) => {
+    const decision = decisionFor(details.url)
+    if (decision !== 'allow') {
+      if (decision === 'external') openExternal(details.url)
+      else LogManage.log(`已拒绝打开窗口：${details.url}`)
+      return { action: 'deny' }
+    }
+
+    const overrideBrowserWindowOptions = childWindowOptions(contents, details.features)
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions,
+      createWindow: () => {
+        // Electron 会从 features 里再解析一份窗口选项（alwaysOnTop、transparent、
+        // webviewTag 等）。没被 override 覆盖的字段会留在合并结果里，所以这里
+        // 只使用白名单结果，不把合并后的 options 传给 BrowserWindow。
+        const child = new BrowserWindow({
+          ...overrideBrowserWindowOptions,
+          alwaysOnTop: false,
+          transparent: false,
+          focusable: true,
+          fullscreen: false,
+          kiosk: false,
+          simpleFullscreen: false
+        })
+        WindowManage.regWindowEvent(child)
+        attachNavigationGuards(child.webContents)
+        return child.webContents
+      }
+    }
+  })
+}
+
+function windowFromEvent(event: IpcMainInvokeEvent): BrowserWindow | null {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (!win || win.isDestroyed()) return null
+  return win
+}
 
 export class WindowManage {
   /**
-   * 注册IpcMain （主进程）事件
-   * @param win
+   * 窗口控制绑定到发送 IPC 的窗口，而不是创建时传入的主窗口。
+   * 这样子窗口标题栏不会误关主窗口。
    */
-  static regWindowIpcMainEvent(win: BrowserWindow) {
-    // 首次显示
-    ipcMain.handle('show-main-window', () => {
-      win.show()
+  static regWindowIpcMainEvent() {
+    ipcMain.handle(IpcChannel.showMainWindow, (event) => {
+      windowFromEvent(event)?.show()
     })
 
-    // 最大化窗口
-    ipcMain.handle('maximize-window', () => {
-      win.maximize()
+    ipcMain.handle(IpcChannel.maximizeWindow, (event) => {
+      windowFromEvent(event)?.maximize()
     })
 
-    // 最小化窗口
-    ipcMain.handle('minimize-window', () => {
-      win.minimize()
+    ipcMain.handle(IpcChannel.minimizeWindow, (event) => {
+      windowFromEvent(event)?.minimize()
     })
 
-    // 恢复窗口
-    ipcMain.handle('restore-window', () => {
-      win.restore()
+    ipcMain.handle(IpcChannel.restoreWindow, (event) => {
+      windowFromEvent(event)?.restore()
     })
 
-    // 关闭窗口
-    ipcMain.handle('close-window', () => {
-      win.close()
+    ipcMain.handle(IpcChannel.closeWindow, (event) => {
+      windowFromEvent(event)?.close()
     })
   }
 
@@ -41,61 +166,20 @@ export class WindowManage {
   static regWindowEvent(win: BrowserWindow) {
     // 最大化窗口
     win.on('maximize', () => {
-      win.webContents.send('on-maximize-window')
+      win.webContents.send(IpcChannel.onMaximizeWindow)
     })
 
     // 最小化窗口
     win.on('unmaximize', () => {
-      win.webContents.send('on-un-maximize-window')
+      win.webContents.send(IpcChannel.onUnMaximizeWindow)
     })
   }
 
   /**
-   * 注册窗口创建事件
+   * 注册窗口创建事件，并限制子窗口能打开和跳转到哪些地址。
    * @param mainWin
    */
   static regWindowCreateHandle(mainWin: BrowserWindow) {
-    // 注册打开子窗口的回调函数
-    mainWin.webContents.setWindowOpenHandler((param) => {
-      LogManage.log(JSON.stringify(param))
-
-      // 基础窗口配置对象
-      const config: BrowserWindowConstructorOptions = {
-        frame: false,
-        show: true,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-          webviewTag: true,
-          spellcheck: false,
-          disableHtmlFullscreenWindowResize: true,
-          preload: ''
-        }
-      }
-
-      // 开发者自定义窗口配置对象
-      const features = JSON.parse(param.features)
-
-      // 无论什么时候，都不能让渲染进程自定义使用那些预加载，只能提供选项让其决定选择
-      features.webPreferences &&
-        (features.webPreferences.preload = features.webPreferences.preloadMain
-          ? join(__dirname, '.', '/preload/main.preload.js')
-          : '')
-
-      for (const p in features) {
-        if (p === 'webPreferences') {
-          for (const p2 in features.webPreferences) {
-            config.webPreferences && (config.webPreferences[p2] = features.webPreferences[p2])
-          }
-        } else {
-          config[p] = features[p]
-        }
-      }
-
-      if (config.modal === true) config.parent = mainWin
-
-      // 允许打开窗口，并传递窗口配置对象
-      return { action: 'allow', overrideBrowserWindowOptions: config }
-    })
+    attachNavigationGuards(mainWin.webContents)
   }
 }

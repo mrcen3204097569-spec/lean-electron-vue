@@ -1,5 +1,6 @@
 import { autoUpdater } from 'electron-updater'
 import { BrowserWindow, ipcMain } from 'electron'
+import { IpcChannel } from '../../shared/electronApi'
 import { LogManage } from './LogManage'
 
 export class Updater {
@@ -8,7 +9,7 @@ export class Updater {
     autoUpdater.autoInstallOnAppQuit = false // 应用退出后自动安装
 
     // 监听检查更新操作（开发环境下未打包，electron-updater 会直接跳过检查）
-    ipcMain.handle('app-update-check', async () => {
+    ipcMain.handle(IpcChannel.appUpdateCheck, async () => {
       try {
         await autoUpdater.checkForUpdates()
       } catch (err) {
@@ -17,29 +18,29 @@ export class Updater {
     })
 
     // 监听开始下载操作
-    ipcMain.handle('app-down-start', async () => {
+    ipcMain.handle(IpcChannel.appDownStart, async () => {
       // 开始下载
       await autoUpdater.downloadUpdate()
     })
 
     // 监听安装操作
-    ipcMain.handle('app-install', async () => {
+    ipcMain.handle(IpcChannel.appInstall, async () => {
       autoUpdater.quitAndInstall()
     })
 
     // 监听验证更新结果
     autoUpdater.on('update-available', (info) => {
-      mainWindow.webContents.send('app-validate-update-notice', info)
+      mainWindow.webContents.send(IpcChannel.appValidateUpdateNotice, info)
     })
 
     // 监听包下载状态
     autoUpdater.on('download-progress', (info) => {
-      mainWindow.webContents.send('app-down-progress', info)
+      mainWindow.webContents.send(IpcChannel.appDownProgress, info)
     })
 
     // 下载完成
     autoUpdater.on('update-downloaded', (info) => {
-      mainWindow.webContents.send('app-down-complete', info)
+      mainWindow.webContents.send(IpcChannel.appDownComplete, info)
     })
 
     // 更新出错

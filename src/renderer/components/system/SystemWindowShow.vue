@@ -4,7 +4,7 @@
  */
 
 onMounted(() => {
-  window.electronWindowApi.showMainWindow()
+  window.electronWindowApi?.showMainWindow()
 })
 </script>
 

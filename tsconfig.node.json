@@ -10,5 +10,5 @@
     "allowImportingTsExtensions": true,
     "types": ["node"]
   },
-  "include": ["vite.config.mts", "plugins/**/*.mts", "config/**/*.mts"]
+  "include": ["vite.config.mts", "vitest.config.mts", "plugins/**/*.mts", "config/**/*.mts", "tests/**/*.ts"]
 }

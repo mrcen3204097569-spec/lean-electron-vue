@@ -4,6 +4,7 @@ import { createRequire } from 'node:module'
 import type { Plugin } from 'vite'
 import { buildConfig } from '../config/build.config.mts'
 import { buildMainProcess } from './mainProcess.mts'
+import { joinUpdateNotes } from './updateNotes.mts'
 
 const require = createRequire(import.meta.url)
 
@@ -39,10 +40,9 @@ class BuildObj {
     const { title, subTitle, content } = buildConfig.updateMsg
     for (const file of fs.readdirSync(releaseDir)) {
       if (!/^latest.*\.yml$/.test(file)) continue
-      fs.appendFileSync(
-        path.join(releaseDir, file),
-        `updateTitle: ${title}\nupdateSubTitle: ${subTitle}\nupdateContent: ${content}\n`
-      )
+      const yamlPath = path.join(releaseDir, file)
+      const existing = fs.readFileSync(yamlPath, 'utf8')
+      fs.writeFileSync(yamlPath, joinUpdateNotes(existing, { title, subTitle, content }))
       console.log(`${file} 写入更新信息成功！`)
     }
 
@@ -58,7 +58,11 @@ export const buildPlugin = (): Plugin => {
       const buildObj = new BuildObj()
       buildMainProcess()
       buildObj.preparePackageJson()
-      await buildObj.buildInstaller()
+      if (process.env.ELECTRON_PACKAGE === '1') {
+        await buildObj.buildInstaller()
+      } else {
+        console.log('已跳过 electron-builder。生成安装包请运行 pnpm dist')
+      }
     }
   }
 }

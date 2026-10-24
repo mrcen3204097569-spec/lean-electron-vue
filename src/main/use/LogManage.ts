@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron'
+import { IpcChannel } from '../../shared/electronApi'
 
 /**
  * log
@@ -20,6 +21,6 @@ export class LogManage {
    */
   static log(text: string) {
     LogManage.mainWindow &&
-      LogManage.mainWindow.webContents.send('electron-log', `electron-log：${text}`)
+      LogManage.mainWindow.webContents.send(IpcChannel.electronLog, `electron-log：${text}`)
   }
 }

@@ -13,6 +13,9 @@ export const buildConfig = {
       productName: 'lean-electron-vue',
       appId: 'com.example.lean-electron-vue',
       asar: true,
+      win: {
+        target: ['nsis']
+      },
       nsis: {
         oneClick: false, // 是否一键安装
         allowElevation: true, // 允许请求提升。 如果为false，则用户必须使用提升的权限重新启动安装程序。
@@ -24,12 +27,21 @@ export const buildConfig = {
         createStartMenuShortcut: true, // 创建开始菜单图标
         shortcutName: 'lean-electron-vue' // 图标名称
       },
-      // 自动更新地址：把 release 目录下的安装包和 latest*.yml 上传到这个地址即可
+      mac: {
+        target: ['dmg'],
+        category: 'public.app-category.developer-tools'
+      },
+      linux: {
+        target: ['AppImage'],
+        category: 'Utility'
+      },
+      // 生产环境的更新地址必须是 HTTPS。latest*.yml 和安装包走明文 HTTP 时，
+      // 中间人可以替换更新说明和安装包。这里的 http://127.0.0.1 只是本机调试占位。
       publish: [{ provider: 'generic', url: 'http://127.0.0.1:3000/static/electron/' }]
     },
     project: process.cwd()
   } as CliOptions,
-  // 自定义更新信息，打包后会追加写入 latest*.yml，渲染进程更新弹窗会展示这些内容
+  // 自定义更新说明，打包后按 YAML 双引号标量追加到 latest*.yml。弹窗按纯文本展示，不渲染 HTML。
   updateMsg: {
     title: '测试更新',
     subTitle: '更新副标题',
