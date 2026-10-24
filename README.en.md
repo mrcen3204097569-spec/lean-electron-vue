@@ -119,6 +119,8 @@ Only `app://` and the current dev-server origin may open inside the app. Other `
 
 Title-bar actions (show, minimize, maximize, restore, close) run on the window that sent the IPC, so a child window does not control the main window. Pages without the preload skip those calls instead of throwing.
 
+`window.open(url)`, `target="_blank"`, and comma-separated features such as `width=800,height=600` are parsed without throwing. `left` / `top` map to `x` / `y`. Unrecognized fields are ignored.
+
 ## FAQ
 
 **My main-process changes don't take effect.** The main process is compiled only once, when `pnpm dev` starts. Restart `pnpm dev` after editing `src/main`.

@@ -8,7 +8,11 @@ import {
   shell
 } from 'electron'
 import { join } from 'path'
-import { decideNavigation, sanitizeWindowFeatures } from '../../shared/navigationPolicy'
+import {
+  decideNavigation,
+  parseWindowFeatures,
+  sanitizeWindowFeatures
+} from '../../shared/navigationPolicy'
 import { getDevServerUrl } from './devServerUrl'
 import { LogManage } from './LogManage'
 
@@ -51,9 +55,7 @@ function childWindowOptions(
   opener: WebContents,
   features: string
 ): BrowserWindowConstructorOptions {
-  // 标准 window.open / <a target="_blank"> 的 features 不是 JSON，解析失败会抛错。
-  // 外链在调用本函数之前已经拒绝，这里仍只服务允许的 app:// 和开发服务器地址。
-  const requested = sanitizeWindowFeatures(JSON.parse(features))
+  const requested = sanitizeWindowFeatures(parseWindowFeatures(features))
   const windowOptions: BrowserWindowConstructorOptions = {
     show: true,
     ...requested.options,

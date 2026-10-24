@@ -193,6 +193,7 @@ dialogReady()
 - 只允许打开 `app://` 以及当前开发服务器同源地址。`http` / `https` 外链用系统浏览器打开，其它协议直接拒绝
 - 主窗口和子窗口都会拦截 `will-navigate` 和 `will-redirect`，页面不能再跳到不受信任的地址
 - 标题栏的显示、最小化、最大化、还原和关闭都作用在发出 IPC 的那个窗口上。没有注入 preload 的页面不会调用这些 API，因此不会因为 `window.electronWindowApi` 不存在而抛错
+- `window.open(url)`、`<a target="_blank">` 以及逗号形式的 features（例如 `width=800,height=600`）不会再让主进程 `JSON.parse` 抛错。`left` / `top` 按 `x` / `y` 处理，无法识别的字段会被忽略
 
 ### 新增页面 / 接口
 

@@ -154,6 +154,51 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value as Record<string, unknown>
 }
 
+const MAX_FEATURE_LENGTH = 16_384
+
+function parseFeatureValue(flagOnly: boolean, rawValue: string): string | number | boolean {
+  if (flagOnly || rawValue === 'yes' || rawValue === 'true') return true
+  if (rawValue === 'no' || rawValue === 'false') return false
+  if (/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(rawValue)) {
+    const numeric = Number(rawValue)
+    if (Number.isFinite(numeric)) return numeric
+  }
+  return rawValue
+}
+
+/** `width=800,height=600,left=10,top=20` and bare flags such as `popup`. */
+function parseCommaSeparatedFeatures(features: string): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
+  for (const part of features.split(',')) {
+    const separator = part.indexOf('=')
+    const rawKey = (separator === -1 ? part : part.slice(0, separator)).trim()
+    const rawValue = separator === -1 ? '' : part.slice(separator + 1).trim()
+    if (!rawKey) continue
+    const key = rawKey === 'left' ? 'x' : rawKey === 'top' ? 'y' : rawKey
+    result[key] = parseFeatureValue(separator === -1, rawValue)
+  }
+  return result
+}
+
+/**
+ * `window.open` features are either a JSON object (this template's createDialog)
+ * or the standard comma-separated feature string. Invalid input yields `{}`
+ * instead of throwing.
+ */
+export function parseWindowFeatures(features: string): unknown {
+  if (typeof features !== 'string') return {}
+  const trimmed = features.trim()
+  if (!trimmed || trimmed.length > MAX_FEATURE_LENGTH) return {}
+  if (trimmed.startsWith('{')) {
+    try {
+      return JSON.parse(trimmed) as unknown
+    } catch {
+      return {}
+    }
+  }
+  return parseCommaSeparatedFeatures(trimmed)
+}
+
 /**
  * Keep only window options the renderer is allowed to request.
  * `webPreferences` is never copied; `preloadMain: true` is the only preload switch.
