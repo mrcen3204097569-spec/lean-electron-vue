@@ -14,6 +14,17 @@ if (!app.isPackaged) {
 
 let mainWindow: BrowserWindow
 
+// 开发插件用 IPC 通知刷新。只有未打包、且由插件拉起（存在 process.send）时才接受。
+if (!app.isPackaged && typeof process.send === 'function') {
+  process.on('message', (message: unknown) => {
+    if (!message || typeof message !== 'object') return
+    if ((message as { type?: unknown }).type !== 'reload-renderer') return
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.webContents.reload()
+    }
+  })
+}
+
 app.whenReady().then(async () => {
   // 只有未打包的开发进程会看到 VITE_DEV_SERVER_URL。打包后忽略它，始终走 app://。
   const devServerUrl = getDevServerUrl()

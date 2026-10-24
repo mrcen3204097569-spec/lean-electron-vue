@@ -82,7 +82,8 @@ GitHub Actions runs `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`
 ```text
 ├── config/build.config.mts    # electron-builder options & update notes
 ├── plugins/
-│   ├── devPlugin.mts          # dev: compile main process & launch Electron
+│   ├── devPlugin.mts          # dev: watch the main process and launch Electron
+│   ├── devElectron.mts        # dev: start, restart, and stop the Electron child
 │   ├── buildPlugin.mts        # build: compile main, write package.json, run electron-builder
 │   └── mainProcess.mts        # shared esbuild step for main / preload
 ├── src/
@@ -97,10 +98,12 @@ GitHub Actions runs `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`
 ```text
 pnpm dev
   └─ vite dev server
-       └─ devPlugin: esbuild src/main → dist/mainEntry.js
+       └─ devPlugin: esbuild watch of src/main → dist/
             └─ electron dist/mainEntry.js
                  └─ VITE_DEV_SERVER_URL=http://127.0.0.1:5173
                       └─ unpackaged: loadURL and open DevTools
+                      └─ main process change: rebuild and restart Electron
+                      └─ preload change: rebuild and reload the window
                       └─ packaged: ignore the variable and any extra CLI args, load app://index.html
 
 pnpm build
@@ -142,7 +145,7 @@ Title-bar actions (show, minimize, maximize, restore, close) run on the window t
 
 ## FAQ
 
-**My main-process changes don't take effect.** The main process is compiled only once, when `pnpm dev` starts. Restart `pnpm dev` after editing `src/main`.
+**My main-process changes don't take effect.** `pnpm dev` watches `src/main`. A main-process change rebuilds and restarts Electron. A `*.preload.ts` change rebuilds and reloads the window. If nothing restarts, check the esbuild error in the terminal.
 
 **ESLint says `ref` / `computed` is undefined.** These are auto-imported. Run `pnpm dev` once to generate `.eslintrc-auto-import.json`.
 

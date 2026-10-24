@@ -103,7 +103,8 @@ GitHub Actions 在 push 和 pull request 上运行 `pnpm lint`、`pnpm typecheck
 ├── config/
 │   └── build.config.mts       # electron-builder 打包配置 & 更新文案
 ├── plugins/
-│   ├── devPlugin.mts          # 开发：编译主进程并启动 Electron
+│   ├── devPlugin.mts          # 开发：监听主进程、启动 / 重启 Electron
+│   ├── devElectron.mts        # 开发：Electron 子进程的启动、重启和退出
 │   ├── buildPlugin.mts        # 构建：编译主进程、生成 package.json、调用 electron-builder
 │   └── mainProcess.mts        # esbuild 编译主进程 / preload 的公共逻辑
 ├── tests/                     # Vitest 纯逻辑单测
@@ -136,10 +137,12 @@ GitHub Actions 在 push 和 pull request 上运行 `pnpm lint`、`pnpm typecheck
 ```text
 pnpm dev
   └─ vite dev server 启动
-       └─ devPlugin: esbuild 编译 src/main → dist/mainEntry.js
+       └─ devPlugin: esbuild watch 编译 src/main → dist/
             └─ 启动 electron dist/mainEntry.js
                  └─ 环境变量 VITE_DEV_SERVER_URL=http://127.0.0.1:5173
                       └─ 未打包时 loadURL 并打开开发者工具
+                      └─ 主进程变更：重新编译并重启 Electron
+                      └─ preload 变更：重新编译并刷新窗口
                       └─ 已打包时忽略该变量和额外命令行参数，加载 app://index.html
 
 pnpm build
@@ -223,7 +226,7 @@ dialogReady()
 
 ## 常见问题
 
-**修改主进程代码后没有生效？** 主进程只在启动 `pnpm dev` 时编译一次，修改 `src/main` 下的代码后需要重新运行 `pnpm dev`。
+**修改主进程代码后没有生效？** `pnpm dev` 会监听 `src/main`。入口及其依赖变更后会重新编译并重启 Electron；`*.preload.ts` 变更后会重新编译并刷新窗口。如果进程没起来，看终端里的 esbuild 报错。
 
 **首次 `pnpm dev` 卡住很久？** 多半是在下载 Electron 二进制，参考上面的镜像配置。
 
