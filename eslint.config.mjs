@@ -38,7 +38,6 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: true }],
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'error'

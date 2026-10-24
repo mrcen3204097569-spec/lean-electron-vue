@@ -12,8 +12,3 @@ app.use(createPinia())
 app.use(router)
 
 app.mount('#app')
-
-/**
- * 注册 electron 调试 log
- */
-window.electronLogApi?.log((event, text) => console.log(text))

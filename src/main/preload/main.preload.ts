@@ -1,40 +1,51 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
+import {
+  IpcChannel,
+  type DownloadProgressInfo,
+  type ElectronAppUpdateApi,
+  type ElectronLogApi,
+  type ElectronWindowApi,
+  type UpdateNotice
+} from '../../shared/electronApi'
 
-/***
- * app 更新相关 - api
- */
-contextBridge.exposeInMainWorld('electronAppUpdateApi', {
-  downStart: () => ipcRenderer.invoke('app-down-start'),
-  downComplete: (callback) => ipcRenderer.on('app-down-complete', callback),
-  downProgress: (callback) => ipcRenderer.on('app-down-progress', callback),
-  updateCheck: () => ipcRenderer.invoke('app-update-check'),
-  appInstall: () => ipcRenderer.invoke('app-install'),
-  validateUpdateNotice: (callback) => ipcRenderer.on('app-validate-update-notice', callback)
-})
+function subscribe<Args extends unknown[]>(
+  channel: string,
+  callback: (...args: Args) => void
+): () => void {
+  const listener = (_event: IpcRendererEvent, ...args: Args) => {
+    callback(...args)
+  }
+  ipcRenderer.on(channel, listener)
+  return () => {
+    ipcRenderer.removeListener(channel, listener)
+  }
+}
 
-/**
- * 窗口相关 - api
- *
- */
-contextBridge.exposeInMainWorld('electronWindowApi', {
-  showMainWindow: () => ipcRenderer.invoke('show-main-window'),
-  /** 最大化窗口 */
-  maximizeWindow: () => ipcRenderer.invoke('maximize-window'),
-  /** 最小化窗口 */
-  minimizeWindow: () => ipcRenderer.invoke('minimize-window'),
-  /** 恢复原始窗口大小 */
-  restoreWindow: () => ipcRenderer.invoke('restore-window'),
-  /** 关闭窗口 */
-  closeWindow: () => ipcRenderer.invoke('close-window'),
-  /** 事件：窗口最大化 */
-  onMaximizeWindow: (callback) => ipcRenderer.on('on-maximize-window', callback),
-  /** 事件：取消窗口最大化 */
-  onUnMaximizeWindow: (callback) => ipcRenderer.on('on-un-maximize-window', callback)
-})
+const electronAppUpdateApi: ElectronAppUpdateApi = {
+  downStart: () => ipcRenderer.invoke(IpcChannel.appDownStart),
+  downComplete: (callback) => subscribe(IpcChannel.appDownComplete, callback),
+  downProgress: (callback) =>
+    subscribe<[DownloadProgressInfo]>(IpcChannel.appDownProgress, callback),
+  updateCheck: () => ipcRenderer.invoke(IpcChannel.appUpdateCheck),
+  appInstall: () => ipcRenderer.invoke(IpcChannel.appInstall),
+  validateUpdateNotice: (callback) =>
+    subscribe<[UpdateNotice]>(IpcChannel.appValidateUpdateNotice, callback)
+}
 
-/**
- * 调试相关
- */
-contextBridge.exposeInMainWorld('electronLogApi', {
-  log: (callback) => ipcRenderer.on('electron-log', callback)
-})
+const electronWindowApi: ElectronWindowApi = {
+  showMainWindow: () => ipcRenderer.invoke(IpcChannel.showMainWindow),
+  maximizeWindow: () => ipcRenderer.invoke(IpcChannel.maximizeWindow),
+  minimizeWindow: () => ipcRenderer.invoke(IpcChannel.minimizeWindow),
+  restoreWindow: () => ipcRenderer.invoke(IpcChannel.restoreWindow),
+  closeWindow: () => ipcRenderer.invoke(IpcChannel.closeWindow),
+  onMaximizeWindow: (callback) => subscribe(IpcChannel.onMaximizeWindow, callback),
+  onUnMaximizeWindow: (callback) => subscribe(IpcChannel.onUnMaximizeWindow, callback)
+}
+
+const electronLogApi: ElectronLogApi = {
+  log: (callback) => subscribe<[string]>(IpcChannel.electronLog, callback)
+}
+
+contextBridge.exposeInMainWorld('electronAppUpdateApi', electronAppUpdateApi)
+contextBridge.exposeInMainWorld('electronWindowApi', electronWindowApi)
+contextBridge.exposeInMainWorld('electronLogApi', electronLogApi)

@@ -8,6 +8,7 @@ import {
   shell
 } from 'electron'
 import { join } from 'path'
+import { IpcChannel } from '../../shared/electronApi'
 import {
   decideNavigation,
   parseWindowFeatures,
@@ -126,23 +127,23 @@ export class WindowManage {
    * 这样子窗口标题栏不会误关主窗口。
    */
   static regWindowIpcMainEvent() {
-    ipcMain.handle('show-main-window', (event) => {
+    ipcMain.handle(IpcChannel.showMainWindow, (event) => {
       windowFromEvent(event)?.show()
     })
 
-    ipcMain.handle('maximize-window', (event) => {
+    ipcMain.handle(IpcChannel.maximizeWindow, (event) => {
       windowFromEvent(event)?.maximize()
     })
 
-    ipcMain.handle('minimize-window', (event) => {
+    ipcMain.handle(IpcChannel.minimizeWindow, (event) => {
       windowFromEvent(event)?.minimize()
     })
 
-    ipcMain.handle('restore-window', (event) => {
+    ipcMain.handle(IpcChannel.restoreWindow, (event) => {
       windowFromEvent(event)?.restore()
     })
 
-    ipcMain.handle('close-window', (event) => {
+    ipcMain.handle(IpcChannel.closeWindow, (event) => {
       windowFromEvent(event)?.close()
     })
   }
@@ -154,12 +155,12 @@ export class WindowManage {
   static regWindowEvent(win: BrowserWindow) {
     // 最大化窗口
     win.on('maximize', () => {
-      win.webContents.send('on-maximize-window')
+      win.webContents.send(IpcChannel.onMaximizeWindow)
     })
 
     // 最小化窗口
     win.on('unmaximize', () => {
-      win.webContents.send('on-un-maximize-window')
+      win.webContents.send(IpcChannel.onUnMaximizeWindow)
     })
   }
 

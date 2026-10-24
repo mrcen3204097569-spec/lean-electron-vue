@@ -30,6 +30,7 @@ withDefaults(defineProps<{ title?: string }>(), {
 })
 
 const windowIsMax = ref(false)
+const stops: Array<() => void> = []
 
 /**
  * 最大化窗口
@@ -60,13 +61,23 @@ const closeWindow = () => {
 }
 
 onMounted(() => {
-  window.electronWindowApi?.onMaximizeWindow(() => {
-    windowIsMax.value = true
-  })
+  const api = window.electronWindowApi
+  if (!api) return
+  stops.push(
+    api.onMaximizeWindow(() => {
+      windowIsMax.value = true
+    })
+  )
+  stops.push(
+    api.onUnMaximizeWindow(() => {
+      windowIsMax.value = false
+    })
+  )
+})
 
-  window.electronWindowApi?.onUnMaximizeWindow(() => {
-    windowIsMax.value = false
-  })
+onUnmounted(() => {
+  for (const stop of stops) stop()
+  stops.length = 0
 })
 </script>
 

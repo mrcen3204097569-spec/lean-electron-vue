@@ -60,6 +60,7 @@ const version = ref('')
 const content = ref('')
 
 const downPercentage = ref(0)
+const stops: Array<() => void> = []
 
 const updateCheck = () => {
   // 询问是否需要更新
@@ -77,38 +78,43 @@ const appInstall = () => {
 }
 
 onMounted(() => {
-  // 监听验证更新结果
-  window.electronAppUpdateApi?.validateUpdateNotice(
-    (
-      event,
-      info: { version: string; updateTitle: string; updateSubTitle: string; updateContent: string }
-    ) => {
+  const api = window.electronAppUpdateApi
+  if (!api) return
+
+  stops.push(
+    api.validateUpdateNotice((info) => {
       console.log('更新验证结果：', info)
       if (info) {
         status.value = EUpdateStatus.WAIT_UPDATE
-        title.value = info.updateTitle
-        subTitle.value = info.updateSubTitle
-        content.value = info.updateContent
+        title.value = info.updateTitle ?? ''
+        subTitle.value = info.updateSubTitle ?? ''
+        content.value = info.updateContent ?? ''
         version.value = info.version
       }
-    }
+    })
   )
 
-  // 下载中ing
-  window.electronAppUpdateApi?.downProgress((event, info) => {
-    console.log('下载中ing：', event, info)
-    status.value = EUpdateStatus.DOWN_ING
-    downPercentage.value = info.percent
-  })
+  stops.push(
+    api.downProgress((info) => {
+      console.log('下载中ing：', info)
+      status.value = EUpdateStatus.DOWN_ING
+      downPercentage.value = info.percent
+    })
+  )
 
-  // 下载结束
-  window.electronAppUpdateApi?.downComplete(() => {
-    console.log('下载结束')
-    status.value = EUpdateStatus.DOWN_END
-  })
+  stops.push(
+    api.downComplete(() => {
+      console.log('下载结束')
+      status.value = EUpdateStatus.DOWN_END
+    })
+  )
 
-  // 询问是否需要更新
   updateCheck()
+})
+
+onUnmounted(() => {
+  for (const stop of stops) stop()
+  stops.length = 0
 })
 </script>
 
