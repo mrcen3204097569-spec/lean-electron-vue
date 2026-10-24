@@ -23,7 +23,7 @@
 - 🖥️ **Electron 45**，默认开启上下文隔离，渲染进程关闭 Node 集成，所有能力通过 `preload` 暴露
 - 🪟 **无边框窗口 + 自定义标题栏**：最小化 / 最大化 / 还原 / 关闭，以及窗口最大化状态同步
 - 🔄 **自动更新**：基于 `electron-updater`，内置更新弹窗（检查 → 下载进度 → 安装），更新文案可在打包时配置
-- 🧩 **多窗口 / 子窗口**：`window.open` 统一由主进程接管，渲染进程可传入窗口配置并选择是否注入 preload
+- 🧩 **多窗口 / 子窗口**：`window.open` 由主进程接管。渲染进程只能改白名单里的窗口选项，并用 `preloadMain` 选择是否注入 preload；外链交给系统浏览器
 - 📦 **自定义 `app://` 协议**：生产环境下通过自定义协议加载页面，支持 `history` 路由模式
 - 🎨 **Element Plus** 按需自动导入，`vue` / `vue-router` / `pinia` API 自动导入
 - 🗂️ **约定式模块**：`router/modules/*.router.ts`、`api/modules/*.ts` 自动注册
@@ -184,7 +184,12 @@ const win = await createDialog('/test', {
 dialogReady()
 ```
 
-出于安全考虑，渲染进程不能指定任意 preload 路径，只能通过 `preloadMain` 选择是否使用内置的 preload。
+安全约束：
+
+- 渲染进程不能自定义 `webPreferences`（包括 `nodeIntegration`、`contextIsolation`、`sandbox`、`webviewTag` 和 preload 路径）。只有 `webPreferences.preloadMain === true` 会注入内置 preload；否则子窗口加载一份空 preload，避免继承主窗口的特权脚本
+- 其它配置只接受白名单内的窗口选项（尺寸、位置、`modal`、标题等）。`modal: true` 时，父窗口固定为发起 `window.open` 的那个窗口
+- 只允许打开 `app://` 以及当前开发服务器同源地址。`http` / `https` 外链用系统浏览器打开，其它协议直接拒绝
+- 主窗口和子窗口都会拦截 `will-navigate` 和 `will-redirect`，页面不能再跳到不受信任的地址
 
 ### 新增页面 / 接口
 

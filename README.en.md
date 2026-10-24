@@ -23,7 +23,7 @@ This template doesn't use a third-party integration such as `electron-vite` or `
 - 🖥️ **Electron 45** with context isolation on and Node integration off in the renderer. All native capabilities are exposed through `preload`.
 - 🪟 **Frameless window + custom title bar**: minimize, maximize, restore and close, with the maximized state synced to the UI
 - 🔄 **Auto update** via `electron-updater`, with a built-in update dialog (check → download progress → install). The update notes are set at build time.
-- 🧩 **Multi-window support**: the main process handles every `window.open` call. The renderer passes window options and chooses whether to inject the preload script.
+- 🧩 **Multi-window support**: the main process handles every `window.open`. The renderer may only set a whitelist of window options and chooses the built-in preload with `preloadMain`. External links open in the system browser.
 - 📦 **Custom `app://` protocol** for loading pages in production, with `history` router mode supported
 - 🎨 **Element Plus** imported on demand, plus auto-imported `vue` / `vue-router` / `pinia` APIs
 - 🗂️ **Convention-based modules**: files in `router/modules/*.router.ts` and `api/modules/*.ts` are registered automatically
@@ -107,6 +107,12 @@ Every dependency lives in `devDependencies`. Vite bundles the renderer, and esbu
 4. On startup, older versions check for updates and show the update dialog.
 
 > In development the app isn't packaged, so `electron-updater` skips the update check. This is expected.
+
+## Child Windows
+
+`createDialog()` still JSON-stringifies a `BrowserWindow` options object into `window.open` features. The main process keeps only safe window options. `webPreferences` is ignored except `preloadMain: true`, which loads the built-in preload. Otherwise the child gets an empty preload so it does not inherit the main window's privileged bridge.
+
+Only `app://` and the current dev-server origin may open inside the app. Other `http` / `https` URLs are passed to `shell.openExternal`, and every other scheme is denied. `will-navigate` and `will-redirect` use the same rule.
 
 ## FAQ
 
