@@ -20,7 +20,7 @@
 ## 特性
 
 - ⚡️ **Vite 8 + Vue 3.5 + TypeScript**，`<script setup>` 写法
-- 🖥️ **Electron 45**，默认开启上下文隔离，渲染进程关闭 Node 集成，所有能力通过 `preload` 暴露
+- 🖥️ **Electron 45**，默认开启上下文隔离和 sandbox，渲染进程关闭 Node 集成和 `<webview>`，所有能力通过 `preload` 暴露。页面带有 CSP；只有开发环境会关掉 Electron 的安全警告
 - 🪟 **无边框窗口 + 自定义标题栏**：最小化 / 最大化 / 还原 / 关闭，以及窗口最大化状态同步
 - 🔄 **自动更新**：基于 `electron-updater`，内置更新弹窗（检查 → 下载进度 → 安装），更新文案可在打包时配置
 - 🧩 **多窗口 / 子窗口**：`window.open` 由主进程接管。渲染进程只能改白名单里的窗口选项，并用 `preloadMain` 选择是否注入 preload；外链交给系统浏览器
@@ -134,7 +134,7 @@ pnpm build
             ├─ esbuild 编译主进程 → dist/mainEntry.js
             ├─ 生成精简的 dist/package.json
             ├─ electron-builder 打包 → release/
-            └─ 把更新文案追加写入 release/latest*.yml
+            └─ 把更新文案按 YAML 双引号标量追加写入 release/latest*.yml
 ```
 
 所有依赖都放在 `devDependencies` 中：渲染进程代码由 Vite 打包，主进程代码（包括 `electron-updater`）由 esbuild 打包进 `mainEntry.js`，因此安装包里不需要 `node_modules`，体积更小。
@@ -162,7 +162,7 @@ window.electronWindowApi.maximizeWindow()
 
 ### 自动更新
 
-1. 修改 `config/build.config.mts` 中的 `publish.url` 为你的更新服务器地址，并按需修改 `updateMsg`（更新标题、副标题、内容，支持 HTML）
+1. 修改 `config/build.config.mts` 中的 `publish.url` 为你的更新服务器地址。生产环境必须使用 **HTTPS**：`latest*.yml` 和安装包走明文 HTTP 时，中间人可以替换更新说明和安装包。配置里的 `http://127.0.0.1` 只用于本机调试。`updateMsg` 是纯文本（保留换行），弹窗不会把它当 HTML 渲染
 2. 提升 `package.json` 中的 `version`，执行 `pnpm build`
 3. 把 `release/` 目录下的安装包、`.blockmap` 和 `latest*.yml` 上传到更新服务器
 4. 旧版本应用启动时会自动检查更新，并弹出 `SystemAppUpdate` 更新弹窗

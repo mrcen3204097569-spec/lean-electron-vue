@@ -1,13 +1,13 @@
 import { net, protocol } from 'electron'
 import * as path from 'path'
 import { pathToFileURL } from 'url'
+import { buildContentSecurityPolicy } from '../../shared/contentSecurityPolicy'
 
 // 为自定义的app协议提供特权（必须在 app ready 之前调用）
 const schemeConfig = {
   standard: true,
   secure: true,
   supportFetchAPI: true,
-  bypassCSP: true,
   corsEnabled: true,
   stream: true
 }
@@ -33,8 +33,17 @@ export class CustomScheme {
         return new Response('Not Found', { status: 404 })
       }
 
-      // net.fetch 读取本地文件时会根据扩展名自动设置 content-type
-      return net.fetch(pathToFileURL(tarFile).toString())
+      // net.fetch 读取本地文件时会根据扩展名自动设置 content-type。
+      // 不使用 bypassCSP，在响应上附上页面自己的 CSP。
+      return net.fetch(pathToFileURL(tarFile).toString()).then((response) => {
+        const headers = new Headers(response.headers)
+        headers.set('Content-Security-Policy', buildContentSecurityPolicy())
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers
+        })
+      })
     })
   }
 }

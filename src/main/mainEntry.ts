@@ -1,17 +1,24 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
+import { installContentSecurityPolicy } from './use/ContentSecurityPolicy'
 import { CustomScheme } from './use/CustomScheme'
 import { getDevServerUrl } from './use/devServerUrl'
 import { Updater } from './use/Updater'
 import { WindowManage } from './use/WindowManage'
 import { LogManage } from './use/LogManage'
 
-// 屏蔽electron console 控制台警告
-process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
+// 开发时 Vite 和 CSP 的提示很吵。打包后保留警告，方便发现真正的安全配置问题。
+if (!app.isPackaged) {
+  process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
+}
 
 let mainWindow: BrowserWindow
 
 app.whenReady().then(async () => {
+  // 只有未打包的开发进程会看到 VITE_DEV_SERVER_URL。打包后忽略它，始终走 app://。
+  const devServerUrl = getDevServerUrl()
+  installContentSecurityPolicy(devServerUrl)
+
   mainWindow = new BrowserWindow({
     // 设置为false不显示窗口，待主页面资源加载完成再手动显示
     show: false,
@@ -20,17 +27,18 @@ app.whenReady().then(async () => {
     webPreferences: {
       // 打包后关闭开发者工具，避免额外命令行参数把调试入口留在正式包里
       devTools: !app.isPackaged,
-      // 是否开启webview标签，开启后可在渲染进程使用<webview></webview>
-      webviewTag: true,
-      // 渲染进程不直接使用 node，所有能力都通过 preload 暴露
+      // 默认关闭 <webview>。启用前要确认页面不能加载不受信任的内容；
+      // webview 的 preload 拥有 Node 能力，不能和主窗口共用。
+      webviewTag: false,
       nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
       // 预加载js：用于暴露API给渲染进程
       preload: join(__dirname, 'preload', 'main.preload.js')
     }
   })
-
-  // 只有未打包的开发进程会看到 VITE_DEV_SERVER_URL。打包后忽略它，始终走 app://。
-  const devServerUrl = getDevServerUrl()
   if (devServerUrl) {
     mainWindow.loadURL(devServerUrl).then(() => {
       mainWindow.webContents.openDevTools()

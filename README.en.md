@@ -20,7 +20,7 @@ This template doesn't use a third-party integration such as `electron-vite` or `
 ## Features
 
 - ⚡️ **Vite 8 + Vue 3.5 + TypeScript** with `<script setup>`
-- 🖥️ **Electron 45** with context isolation on and Node integration off in the renderer. All native capabilities are exposed through `preload`.
+- 🖥️ **Electron 45** with context isolation and the sandbox on, and with Node integration and `<webview>` off. Native capabilities are exposed through `preload`. Documents get a CSP. Electron's security warnings are silenced only in development.
 - 🪟 **Frameless window + custom title bar**: minimize, maximize, restore and close, with the maximized state synced to the UI
 - 🔄 **Auto update** via `electron-updater`, with a built-in update dialog (check → download progress → install). The update notes are set at build time.
 - 🧩 **Multi-window support**: the main process handles every `window.open`. The renderer may only set a whitelist of window options and chooses the built-in preload with `preloadMain`. External links open in the system browser.
@@ -97,14 +97,14 @@ pnpm build
             ├─ esbuild main process → dist/mainEntry.js
             ├─ write a minimal dist/package.json
             ├─ electron-builder → release/
-            └─ append update notes to release/latest*.yml
+            └─ append update notes to release/latest*.yml as YAML double-quoted scalars
 ```
 
 Every dependency lives in `devDependencies`. Vite bundles the renderer, and esbuild bundles the main process (including `electron-updater`) into `mainEntry.js`. The installer therefore ships without `node_modules`.
 
 ## Auto Update
 
-1. Set `publish.url` in `config/build.config.mts` to your update server, and edit `updateMsg` (HTML is supported).
+1. Set `publish.url` in `config/build.config.mts` to your update server. Production feeds must use **HTTPS**. An HTTP feed lets a network attacker replace `latest*.yml` and the installer. The bundled `http://127.0.0.1` value is only a local placeholder. `updateMsg` is plain text (newlines are kept) and is not rendered as HTML.
 2. Bump `version` in `package.json` and run `pnpm build`.
 3. Upload the installer, its `.blockmap` and `latest*.yml` from `release/` to the server.
 4. On startup, older versions check for updates and show the update dialog.
