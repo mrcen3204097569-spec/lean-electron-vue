@@ -14,7 +14,7 @@ An out-of-the-box desktop app template built with **Vite + Electron + Vue 3 + Ty
 
 This template doesn't use a third-party integration such as `electron-vite` or `vite-plugin-electron`. Two small custom Vite plugins connect Vite and Electron, so the whole build pipeline is a few dozen lines of code that you can read and change.
 
-- `pnpm dev`: starts the Vite dev server, compiles the main process with esbuild, then launches Electron. The renderer supports HMR.
+- `pnpm dev`: starts the Vite dev server, compiles the main process with esbuild, then launches Electron. The dev server URL is passed in `VITE_DEV_SERVER_URL`. The renderer supports HMR.
 - `pnpm build`: builds the renderer, compiles the main process and runs electron-builder to produce an installer, all in one command.
 
 ## Features
@@ -86,7 +86,10 @@ pnpm build
 pnpm dev
   └─ vite dev server
        └─ devPlugin: esbuild src/main → dist/mainEntry.js
-            └─ electron dist/mainEntry.js http://127.0.0.1:5173
+            └─ electron dist/mainEntry.js
+                 └─ VITE_DEV_SERVER_URL=http://127.0.0.1:5173
+                      └─ unpackaged: loadURL and open DevTools
+                      └─ packaged: ignore the variable and any extra CLI args, load app://index.html
 
 pnpm build
   └─ vite build (renderer → dist/)

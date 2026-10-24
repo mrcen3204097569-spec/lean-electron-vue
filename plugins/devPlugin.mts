@@ -19,9 +19,15 @@ export const devPlugin = (): Plugin => {
 
         // electron 包导出的是可执行文件路径（首次使用时会自动下载二进制）
         const { default: electronPath } = await import('electron')
-        const electronProcess = spawn(String(electronPath), ['./dist/mainEntry.js', httpAddress], {
+        // 地址放在环境变量里。命令行参数会被打包后的应用忽略，也不能再被当成要加载的 URL。
+        const electronProcess = spawn(String(electronPath), ['./dist/mainEntry.js'], {
           cwd: process.cwd(),
-          stdio: 'inherit'
+          stdio: 'inherit',
+          env: {
+            ...process.env,
+            // 与 src/main/use/devServerUrl.ts 中读取的变量名保持一致
+            VITE_DEV_SERVER_URL: httpAddress
+          }
         })
 
         // electron 服务关闭监听

@@ -14,7 +14,7 @@
 
 一个不依赖 `electron-vite`、`vite-plugin-electron` 等第三方集成方案的 Electron 模板：通过两个很薄的自定义 Vite 插件把 Vite 和 Electron 串起来，整个构建流程只有几十行代码，**看得懂、改得动**。
 
-- `pnpm dev`：启动 Vite 开发服务器，用 esbuild 编译主进程后自动拉起 Electron，渲染进程支持 HMR
+- `pnpm dev`：启动 Vite 开发服务器，用 esbuild 编译主进程后自动拉起 Electron，开发服务器地址通过环境变量 `VITE_DEV_SERVER_URL` 传入。渲染进程支持 HMR
 - `pnpm build`：构建渲染进程 → 编译主进程 → 调用 electron-builder 生成安装包，一条命令完成
 
 ## 特性
@@ -123,8 +123,10 @@ pnpm build
 pnpm dev
   └─ vite dev server 启动
        └─ devPlugin: esbuild 编译 src/main → dist/mainEntry.js
-            └─ 启动 electron dist/mainEntry.js http://127.0.0.1:5173
-                 └─ 主窗口 loadURL(开发服务器地址)
+            └─ 启动 electron dist/mainEntry.js
+                 └─ 环境变量 VITE_DEV_SERVER_URL=http://127.0.0.1:5173
+                      └─ 未打包时 loadURL 并打开开发者工具
+                      └─ 已打包时忽略该变量和额外命令行参数，加载 app://index.html
 
 pnpm build
   └─ vite build（渲染进程 → dist/）

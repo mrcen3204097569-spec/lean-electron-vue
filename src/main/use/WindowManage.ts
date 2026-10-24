@@ -1,4 +1,5 @@
 import {
+  app,
   BrowserWindow,
   BrowserWindowConstructorOptions,
   WebContents,
@@ -33,7 +34,8 @@ function secureWebPreferences(
     allowRunningInsecureContent: false,
     experimentalFeatures: false,
     spellcheck: false,
-    disableHtmlFullscreenWindowResize: true
+    disableHtmlFullscreenWindowResize: true,
+    devTools: !app.isPackaged
   }
 }
 
