@@ -17,6 +17,47 @@
     </div>
 
     <div class="actions">
+      <!-- 视窗置顶切换按钮 -->
+      <div class="actions__plugin-item">
+        <el-tooltip :content="isAlwaysOnTop ? '取消窗口置顶' : '锁定窗口置顶'" placement="bottom">
+          <el-button
+            text
+            plain
+            size="small"
+            :class="{ 'is-pinned': isAlwaysOnTop }"
+            @click="toggleAlwaysOnTop"
+          >
+            📌
+          </el-button>
+        </el-tooltip>
+      </div>
+
+      <!-- 视窗透明度调节气泡 -->
+      <div class="actions__plugin-item">
+        <el-popover placement="bottom" :width="180" trigger="click">
+          <template #reference>
+            <el-button text plain size="small" title="调节窗口透明度">👁️</el-button>
+          </template>
+          <div class="opacity-popover">
+            <span class="opacity-label">透明度: {{ Math.round(opacityVal * 100) }}%</span>
+            <el-slider
+              v-model="opacityVal"
+              :min="0.3"
+              :max="1"
+              :step="0.05"
+              @change="updateOpacity"
+            />
+          </div>
+        </el-popover>
+      </div>
+
+      <!-- 视窗截屏快照 -->
+      <div class="actions__plugin-item">
+        <el-tooltip content="捕捉视窗快照至剪贴板" placement="bottom">
+          <el-button text plain size="small" @click="captureScreenshot">📷</el-button>
+        </el-tooltip>
+      </div>
+
       <!-- 插件注入的快捷操作 -->
       <div
         v-for="item in pluginManager.activeHeaderActions.value"
@@ -55,13 +96,43 @@
 <script lang="ts" setup name="SystemBarTop">
 import { Close, CopyDocument, FullScreen, Minus, Search } from '@element-plus/icons-vue'
 import { pluginManager } from '@/plugin/pluginManager'
+import { ElMessage } from 'element-plus'
 
 withDefaults(defineProps<{ title?: string }>(), {
   title: '应用程序'
 })
 
 const windowIsMax = ref(false)
+const isAlwaysOnTop = ref(false)
+const opacityVal = ref(1)
 const stops: Array<() => void> = []
+
+const toggleAlwaysOnTop = async () => {
+  const api = window.electronWindowApi
+  if (!api?.setAlwaysOnTop) return
+  const next = !isAlwaysOnTop.value
+  const res = await api.setAlwaysOnTop(next)
+  isAlwaysOnTop.value = res
+  ElMessage.info(res ? '已开启视窗置顶锁定' : '已取消视窗置顶')
+}
+
+const updateOpacity = async (val: number | number[]) => {
+  const api = window.electronWindowApi
+  if (!api?.setOpacity) return
+  const num = Array.isArray(val) ? val[0] : val
+  await api.setOpacity(num)
+}
+
+const captureScreenshot = async () => {
+  const api = window.electronWindowApi
+  if (!api?.captureScreenshot) return
+  const res = await api.captureScreenshot()
+  if (res.success) {
+    ElMessage.success('视窗屏幕快照已复制到系统剪贴板！')
+  } else {
+    ElMessage.warning('快照截取失败')
+  }
+}
 
 const openCommandPalette = () => {
   window.dispatchEvent(new CustomEvent('open-command-palette'))
@@ -95,9 +166,16 @@ const closeWindow = () => {
   window.electronWindowApi?.closeWindow()
 }
 
-onMounted(() => {
+onMounted(async () => {
   const api = window.electronWindowApi
   if (!api) return
+
+  if (api.getAlwaysOnTop) {
+    isAlwaysOnTop.value = await api.getAlwaysOnTop()
+  }
+  if (api.getOpacity) {
+    opacityVal.value = await api.getOpacity()
+  }
   stops.push(
     api.onMaximizeWindow(() => {
       windowIsMax.value = true
@@ -208,6 +286,19 @@ onUnmounted(() => {
 
   &__plugin-item {
     margin-right: 4px;
+    .is-pinned {
+      color: #e6a23c;
+      font-weight: bold;
+    }
+  }
+}
+
+.opacity-popover {
+  padding: 4px;
+  .opacity-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--el-text-color-regular);
   }
 }
 

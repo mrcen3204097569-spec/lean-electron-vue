@@ -50,6 +50,40 @@
           </div>
           <el-switch v-model="openAtLogin" @change="handleLoginItemChange" />
         </div>
+        <el-divider />
+        <div class="setting-item">
+          <div class="item-info">
+            <span class="item-label">视窗预设分辨率</span>
+            <span class="item-desc">快速将主视窗调整为标准分辨率</span>
+          </div>
+          <div class="preset-size-buttons">
+            <el-button size="small" @click="setPresetSize(1024, 768)">1024 x 768</el-button>
+            <el-button size="small" @click="setPresetSize(1280, 800)">1280 x 800</el-button>
+            <el-button size="small" @click="setPresetSize(1440, 900)">1440 x 900</el-button>
+            <el-button size="small" type="primary" plain @click="centerWindow">居中视窗</el-button>
+          </div>
+        </div>
+      </el-card>
+
+      <!-- 存储与缓存诊断管理 -->
+      <el-card shadow="never" class="settings-card">
+        <template #header>
+          <div class="card-title">
+            <el-icon><Delete /></el-icon>
+            <span>缓存与存储诊断清理</span>
+          </div>
+        </template>
+        <div class="setting-item">
+          <div class="item-info">
+            <span class="item-label">本地数据与磁盘缓存</span>
+            <span class="item-desc">
+              存储键数量: {{ storageKeyCount }} 项，估算占用: {{ storageSizeKb }} KB
+            </span>
+          </div>
+          <el-button type="danger" plain size="small" @click="clearAppStorage">
+            一键深度清理
+          </el-button>
+        </div>
       </el-card>
 
       <!-- 3. 声音与触觉反馈 -->
@@ -140,8 +174,8 @@
 </template>
 
 <script lang="ts" setup name="SettingsView">
-import { Bell, Connection, InfoFilled, Monitor, Sunny } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { Bell, Connection, Delete, InfoFilled, Monitor, Sunny } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { currentTheme, setTheme, type ThemeMode } from '@/common/theme'
 import { isSoundEnabled, setSoundEnabled, playSound, type SoundType } from '@/common/sound'
 
@@ -151,6 +185,60 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
 const closeToTray = ref(false)
 const openAtLogin = ref(false)
 const soundEnabled = ref(isSoundEnabled.value)
+const storageKeyCount = ref(0)
+const storageSizeKb = ref(0)
+
+function calculateStorage() {
+  if (typeof localStorage === 'undefined') return
+  storageKeyCount.value = localStorage.length
+  let totalBytes = 0
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i) || ''
+    const val = localStorage.getItem(key) || ''
+    totalBytes += key.length + val.length
+  }
+  storageSizeKb.value = Math.round((totalBytes / 1024) * 10) / 10
+}
+
+async function setPresetSize(w: number, h: number) {
+  if (window.electronWindowApi?.setPresetSize) {
+    await window.electronWindowApi.setPresetSize(w, h)
+    ElMessage.success(`窗口已调整为 ${w} x ${h}`)
+  }
+}
+
+async function centerWindow() {
+  if (window.electronWindowApi?.centerWindow) {
+    await window.electronWindowApi.centerWindow()
+    ElMessage.success('视窗已重新居中')
+  }
+}
+
+async function clearAppStorage() {
+  try {
+    await ElMessageBox.confirm(
+      '清理将删除所有本地持久化配置与缓存数据并重新载入，确认继续吗？',
+      '提示',
+      {
+        type: 'warning',
+        confirmButtonText: '确认清理',
+        cancelButtonText: '取消'
+      }
+    )
+    if (window.electronSystemApi?.clearStorageData) {
+      await window.electronSystemApi.clearStorageData()
+    }
+    localStorage.clear()
+    sessionStorage.clear()
+    calculateStorage()
+    ElMessage.success('缓存已清空，正在重载页面...')
+    setTimeout(() => {
+      window.location.reload()
+    }, 500)
+  } catch {
+    // canceled
+  }
+}
 
 function handleThemeChange(val: string | number | boolean | undefined) {
   if (typeof val === 'string') {
@@ -196,6 +284,7 @@ function checkForUpdates() {
 }
 
 onMounted(async () => {
+  calculateStorage()
   if (window.electronSystemApi) {
     try {
       closeToTray.value = await window.electronSystemApi.getCloseToTray()

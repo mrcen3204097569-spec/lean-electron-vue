@@ -43,7 +43,18 @@ const electronWindowApi: ElectronWindowApi = {
   restoreWindow: () => ipcRenderer.invoke(IpcChannel.restoreWindow),
   closeWindow: () => ipcRenderer.invoke(IpcChannel.closeWindow),
   onMaximizeWindow: (callback) => subscribe(IpcChannel.onMaximizeWindow, callback),
-  onUnMaximizeWindow: (callback) => subscribe(IpcChannel.onUnMaximizeWindow, callback)
+  onUnMaximizeWindow: (callback) => subscribe(IpcChannel.onUnMaximizeWindow, callback),
+  setAlwaysOnTop: (alwaysOnTop: boolean) =>
+    ipcRenderer.invoke(IpcChannel.windowSetAlwaysOnTop, alwaysOnTop),
+  getAlwaysOnTop: () => ipcRenderer.invoke(IpcChannel.windowGetAlwaysOnTop),
+  setOpacity: (opacity: number) => ipcRenderer.invoke(IpcChannel.windowSetOpacity, opacity),
+  getOpacity: () => ipcRenderer.invoke(IpcChannel.windowGetOpacity),
+  centerWindow: () => ipcRenderer.invoke(IpcChannel.windowCenter),
+  setPresetSize: (width: number, height: number) =>
+    ipcRenderer.invoke(IpcChannel.windowSetPresetSize, width, height),
+  captureScreenshot: () => ipcRenderer.invoke(IpcChannel.windowCaptureScreenshot),
+  setZoomFactor: (factor: number) => ipcRenderer.invoke(IpcChannel.windowSetZoomFactor, factor),
+  getZoomFactor: () => ipcRenderer.invoke(IpcChannel.windowGetZoomFactor)
 }
 
 const electronLogApi: ElectronLogApi = {
@@ -70,7 +81,9 @@ const electronSystemApi: ElectronSystemApi = {
   unregisterShortcut: (accelerator: string) =>
     ipcRenderer.invoke(IpcChannel.shortcutUnregister, accelerator),
   onShortcut: (callback: (accelerator: string) => void) =>
-    subscribe<[string]>(IpcChannel.onGlobalShortcutTriggered, callback)
+    subscribe<[string]>(IpcChannel.onGlobalShortcutTriggered, callback),
+  clearStorageData: () => ipcRenderer.invoke(IpcChannel.systemClearStorage),
+  getProcessMemory: () => ipcRenderer.invoke(IpcChannel.systemGetProcessMemory)
 }
 
 contextBridge.exposeInMainWorld('electronAppUpdateApi', electronAppUpdateApi)

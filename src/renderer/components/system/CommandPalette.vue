@@ -205,6 +205,103 @@ const systemCommands = computed<Omit<PaletteItem, 'flatIndex'>[]>(() => [
     action: () => setTheme(currentTheme.value === 'dark' ? 'light' : 'dark')
   },
   {
+    id: 'action.toggle-pin',
+    title: '切换视窗置顶锁定 (Always-on-Top)',
+    subtitle: '锁定窗口在所有其他程序最顶层显示',
+    category: '🖥️ 视窗控制操作',
+    icon: Operation,
+    action: async () => {
+      const api = window.electronWindowApi
+      if (!api) return
+      const cur = await api.getAlwaysOnTop()
+      await api.setAlwaysOnTop(!cur)
+    }
+  },
+  {
+    id: 'action.screenshot',
+    title: '截取当前视窗并写入剪贴板',
+    subtitle: '原生产生 PNG 快照并复制到系统剪贴板',
+    category: '🖥️ 视窗控制操作',
+    icon: Operation,
+    action: () => window.electronWindowApi?.captureScreenshot()
+  },
+  {
+    id: 'action.center-window',
+    title: '视窗重置居中 (Center Window)',
+    subtitle: '将当前应用窗口移至屏幕正中央',
+    category: '🖥️ 视窗控制操作',
+    icon: Operation,
+    action: () => window.electronWindowApi?.centerWindow()
+  },
+  {
+    id: 'action.preset-size-1024',
+    title: '调整窗口尺寸为 1024x768 (标准比例)',
+    subtitle: '快速切换为紧凑窗口分辨率',
+    category: '🖥️ 视窗控制操作',
+    icon: Operation,
+    action: () => window.electronWindowApi?.setPresetSize(1024, 768)
+  },
+  {
+    id: 'action.preset-size-1280',
+    title: '调整窗口尺寸为 1280x800 (宽屏便携)',
+    subtitle: '快速切换为中等宽屏分辨率',
+    category: '🖥️ 视窗控制操作',
+    icon: Operation,
+    action: () => window.electronWindowApi?.setPresetSize(1280, 800)
+  },
+  {
+    id: 'action.zoom-in',
+    title: '放大视窗视图比例 (+10%)',
+    subtitle: '增加界面字体与元素缩放大小',
+    category: '🖥️ 视窗控制操作',
+    shortcut: 'Ctrl++',
+    icon: Operation,
+    action: async () => {
+      const api = window.electronWindowApi
+      if (!api) return
+      const f = await api.getZoomFactor()
+      await api.setZoomFactor(f + 0.1)
+    }
+  },
+  {
+    id: 'action.zoom-out',
+    title: '缩小视窗视图比例 (-10%)',
+    subtitle: '降低界面字体与元素缩放大小',
+    category: '🖥️ 视窗控制操作',
+    shortcut: 'Ctrl+-',
+    icon: Operation,
+    action: async () => {
+      const api = window.electronWindowApi
+      if (!api) return
+      const f = await api.getZoomFactor()
+      await api.setZoomFactor(f - 0.1)
+    }
+  },
+  {
+    id: 'action.zoom-reset',
+    title: '重置视窗视图比例 (100%)',
+    subtitle: '将界面元素缩放重置为 1.0',
+    category: '🖥️ 视窗控制操作',
+    shortcut: 'Ctrl+0',
+    icon: Operation,
+    action: () => window.electronWindowApi?.setZoomFactor(1.0)
+  },
+  {
+    id: 'action.clear-cache',
+    title: '一键清理应用缓存与本地存储',
+    subtitle: '安全清空网络磁盘缓存、Session 及临时数据',
+    category: '🛠️ 系统快捷操作',
+    icon: Refresh,
+    action: async () => {
+      if (window.electronSystemApi?.clearStorageData) {
+        await window.electronSystemApi.clearStorageData()
+      }
+      localStorage.clear()
+      sessionStorage.clear()
+      window.location.reload()
+    }
+  },
+  {
     id: 'action.minimize-tray',
     title: '最小化到系统托盘',
     subtitle: '应用后台常驻，可通过托盘图标一键恢复',

@@ -1,10 +1,18 @@
 <template>
   <footer class="c-system-bar-bottom">
     <div class="section-left">
-      <!-- 网络状态指示灯 -->
-      <div class="status-item network-status" :title="isOnline ? '网络正常' : '网络已断开'">
+      <!-- 网络状态指示灯与延迟测速 -->
+      <div
+        class="status-item network-status"
+        :title="`网络状态: ${isOnline ? '在线' : '离线'}, 往返延迟: ${latency}ms`"
+      >
         <span class="status-dot" :class="{ 'is-online': isOnline }"></span>
-        <span class="status-text">{{ isOnline ? '在线' : '离线' }}</span>
+        <span class="status-text">{{ isOnline ? `${latency}ms` : '离线' }}</span>
+      </div>
+
+      <!-- 实时内存占用指示 -->
+      <div v-if="memoryText" class="status-item memory-badge" :title="`主进程内存: ${memoryText}`">
+        <span class="status-text">⚡ {{ memoryText }}</span>
       </div>
 
       <!-- 激活插件数量指示 -->
@@ -49,6 +57,11 @@
       <div class="status-item version-badge">
         <span class="status-text">v2.0.0</span>
       </div>
+
+      <!-- 高精度本地时钟 -->
+      <div class="status-item clock-badge" :title="fullDateStr">
+        <span class="status-text">🕒 {{ clockStr }}</span>
+      </div>
     </div>
   </footer>
 </template>
@@ -59,6 +72,13 @@ import { pluginManager } from '@/plugin/pluginManager'
 
 const isOnline = ref(window.navigator.onLine)
 const isDev = import.meta.env.DEV
+const latency = ref(15)
+const memoryText = ref('')
+const clockStr = ref('')
+const fullDateStr = ref('')
+
+let pingTimer: ReturnType<typeof setInterval> | null = null
+let clockTimer: ReturnType<typeof setInterval> | null = null
 
 const activePluginCount = computed(() => {
   return pluginManager.allPlugins.value.filter((p) => p.enabled).length
@@ -68,6 +88,36 @@ const updateOnlineStatus = () => {
   isOnline.value = window.navigator.onLine
 }
 
+const updateClock = () => {
+  const now = new Date()
+  clockStr.value = now.toTimeString().split(' ')[0]
+  fullDateStr.value = now.toLocaleString()
+}
+
+const checkLatencyAndMemory = async () => {
+  if (isOnline.value) {
+    const t0 = performance.now()
+    try {
+      await fetch('/vite.svg?t=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+      latency.value = Math.max(1, Math.round(performance.now() - t0))
+    } catch {
+      latency.value = 20
+    }
+  }
+
+  // 内存检查
+  const sysApi = window.electronSystemApi
+  if (sysApi?.getProcessMemory) {
+    try {
+      const mem = await sysApi.getProcessMemory()
+      const mb = Math.round(mem.main.rss / 1024 / 1024)
+      memoryText.value = `${mb}MB`
+    } catch {
+      // 容错
+    }
+  }
+}
+
 const openShortcutsModal = () => {
   window.dispatchEvent(new CustomEvent('open-shortcuts-modal'))
 }
@@ -75,11 +125,17 @@ const openShortcutsModal = () => {
 onMounted(() => {
   window.addEventListener('online', updateOnlineStatus)
   window.addEventListener('offline', updateOnlineStatus)
+  updateClock()
+  clockTimer = setInterval(updateClock, 1000)
+  checkLatencyAndMemory()
+  pingTimer = setInterval(checkLatencyAndMemory, 5000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('online', updateOnlineStatus)
   window.removeEventListener('offline', updateOnlineStatus)
+  if (clockTimer) clearInterval(clockTimer)
+  if (pingTimer) clearInterval(pingTimer)
 })
 </script>
 

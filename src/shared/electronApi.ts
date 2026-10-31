@@ -30,7 +30,18 @@ export const IpcChannel = {
   trayGetCloseToTray: 'tray-get-close-to-tray',
   shortcutRegister: 'shortcut-register',
   shortcutUnregister: 'shortcut-unregister',
-  onGlobalShortcutTriggered: 'on-global-shortcut-triggered'
+  onGlobalShortcutTriggered: 'on-global-shortcut-triggered',
+  windowSetAlwaysOnTop: 'window-set-always-on-top',
+  windowGetAlwaysOnTop: 'window-get-always-on-top',
+  windowSetOpacity: 'window-set-opacity',
+  windowGetOpacity: 'window-get-opacity',
+  windowCenter: 'window-center',
+  windowSetPresetSize: 'window-set-preset-size',
+  windowCaptureScreenshot: 'window-capture-screenshot',
+  windowSetZoomFactor: 'window-set-zoom-factor',
+  windowGetZoomFactor: 'window-get-zoom-factor',
+  systemClearStorage: 'system-clear-storage',
+  systemGetProcessMemory: 'system-get-process-memory'
 } as const
 
 export interface DownloadProgressInfo {
@@ -65,6 +76,15 @@ export interface ElectronWindowApi {
   closeWindow: () => Promise<void>
   onMaximizeWindow: (callback: () => void) => () => void
   onUnMaximizeWindow: (callback: () => void) => () => void
+  setAlwaysOnTop: (alwaysOnTop: boolean) => Promise<boolean>
+  getAlwaysOnTop: () => Promise<boolean>
+  setOpacity: (opacity: number) => Promise<void>
+  getOpacity: () => Promise<number>
+  centerWindow: () => Promise<void>
+  setPresetSize: (width: number, height: number) => Promise<void>
+  captureScreenshot: () => Promise<{ success: boolean; dataUrl?: string }>
+  setZoomFactor: (factor: number) => Promise<void>
+  getZoomFactor: () => Promise<number>
 }
 
 export interface ElectronLogApi {
@@ -136,4 +156,10 @@ export interface ElectronSystemApi {
   registerShortcut: (accelerator: string) => Promise<boolean>
   unregisterShortcut: (accelerator: string) => Promise<void>
   onShortcut: (callback: (accelerator: string) => void) => () => void
+  clearStorageData: () => Promise<void>
+  getProcessMemory: () => Promise<{
+    main: { rss: number; heapTotal: number; heapUsed: number }
+    systemFreeMemory: number
+    systemTotalMemory: number
+  }>
 }

@@ -2,6 +2,7 @@ import {
   app,
   BrowserWindow,
   BrowserWindowConstructorOptions,
+  clipboard,
   IpcMainInvokeEvent,
   WebContents,
   ipcMain,
@@ -155,6 +156,69 @@ export class WindowManage {
 
     ipcMain.handle(IpcChannel.closeWindow, (event) => {
       windowFromEvent(event)?.close()
+    })
+
+    // 视窗置顶切换
+    ipcMain.handle(IpcChannel.windowSetAlwaysOnTop, (event, alwaysOnTop: boolean) => {
+      const win = windowFromEvent(event)
+      if (!win) return false
+      win.setAlwaysOnTop(Boolean(alwaysOnTop))
+      return win.isAlwaysOnTop()
+    })
+
+    ipcMain.handle(IpcChannel.windowGetAlwaysOnTop, (event) => {
+      return windowFromEvent(event)?.isAlwaysOnTop() ?? false
+    })
+
+    // 视窗透明度调节 (0.2 ~ 1.0)
+    ipcMain.handle(IpcChannel.windowSetOpacity, (event, opacity: number) => {
+      const win = windowFromEvent(event)
+      if (!win) return
+      const safeVal = Math.min(Math.max(Number(opacity) || 1, 0.2), 1)
+      win.setOpacity(safeVal)
+    })
+
+    ipcMain.handle(IpcChannel.windowGetOpacity, (event) => {
+      return windowFromEvent(event)?.getOpacity() ?? 1
+    })
+
+    // 视窗居中
+    ipcMain.handle(IpcChannel.windowCenter, (event) => {
+      windowFromEvent(event)?.center()
+    })
+
+    // 视窗预设分辨率切换
+    ipcMain.handle(IpcChannel.windowSetPresetSize, (event, width: number, height: number) => {
+      const win = windowFromEvent(event)
+      if (!win) return
+      win.setSize(Math.round(width), Math.round(height))
+      win.center()
+    })
+
+    // 视窗屏幕截图捕获并写入剪贴板
+    ipcMain.handle(IpcChannel.windowCaptureScreenshot, async (event) => {
+      const win = windowFromEvent(event)
+      if (!win) return { success: false }
+      try {
+        const image = await win.capturePage()
+        clipboard.writeImage(image)
+        return { success: true, dataUrl: image.toDataURL() }
+      } catch (err) {
+        LogManage.log(`视窗截图失败: ${err}`)
+        return { success: false }
+      }
+    })
+
+    // 视窗缩放因子
+    ipcMain.handle(IpcChannel.windowSetZoomFactor, (event, factor: number) => {
+      const win = windowFromEvent(event)
+      if (!win) return
+      const safeFactor = Math.min(Math.max(Number(factor) || 1, 0.5), 2.5)
+      win.webContents.setZoomFactor(safeFactor)
+    })
+
+    ipcMain.handle(IpcChannel.windowGetZoomFactor, (event) => {
+      return windowFromEvent(event)?.webContents.getZoomFactor() ?? 1
     })
   }
 

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain, Notification } from 'electron'
+import { app, BrowserWindow, clipboard, dialog, ipcMain, Notification, session } from 'electron'
 import os from 'node:os'
 import {
   IpcChannel,
@@ -90,6 +90,26 @@ export class SystemManage {
     ipcMain.handle(IpcChannel.systemSetLoginItem, async (_event, openAtLogin: boolean) => {
       if (app.isPackaged) {
         app.setLoginItemSettings({ openAtLogin: Boolean(openAtLogin) })
+      }
+    })
+
+    // 清除应用网络缓存与存储数据
+    ipcMain.handle(IpcChannel.systemClearStorage, async () => {
+      await session.defaultSession.clearCache()
+      await session.defaultSession.clearStorageData()
+    })
+
+    // 获取系统与主进程内存占用指标
+    ipcMain.handle(IpcChannel.systemGetProcessMemory, async () => {
+      const mem = process.memoryUsage()
+      return {
+        main: {
+          rss: mem.rss,
+          heapTotal: mem.heapTotal,
+          heapUsed: mem.heapUsed
+        },
+        systemFreeMemory: os.freemem(),
+        systemTotalMemory: os.totalmem()
       }
     })
   }
