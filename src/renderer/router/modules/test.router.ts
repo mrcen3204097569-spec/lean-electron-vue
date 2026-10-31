@@ -4,5 +4,8 @@ import { RouteRecordRaw } from 'vue-router'
 export default <RouteRecordRaw>{
   path: '/test',
   name: 'test-view',
-  component: TestView
+  component: TestView,
+  meta: {
+    title: '原生能力演示'
+  }
 }
