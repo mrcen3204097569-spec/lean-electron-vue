@@ -12,39 +12,79 @@ An out-of-the-box desktop app template built with **Vite + Electron + Vue 3 + Ty
 
 ## Introduction
 
-This template doesn't use a third-party integration such as `electron-vite` or `vite-plugin-electron`. Two small custom Vite plugins connect Vite and Electron, so the whole build pipeline is a few dozen lines of code that you can read and change.
+An enterprise-ready modern desktop application template that avoids complex third-party wrappers like `electron-vite` or `vite-plugin-electron`. Two clean, minimal custom Vite plugins connect Vite and Electron in just dozens of lines of code. It features a complete **extensible Plugin Engine** and a **productivity suite boasting 50+ rich built-in features**.
 
-- `pnpm dev`: starts the Vite dev server, compiles the main process with esbuild, then launches Electron. The dev server URL is passed in `VITE_DEV_SERVER_URL`. The renderer supports HMR.
-- `pnpm build`: builds the renderer and the main process into a runnable `dist/`. It does not run electron-builder.
-- `pnpm dist`: runs that build and then electron-builder.
-- `pnpm test`: runs Vitest unit tests for the `app://` path guard, update-note YAML, window policy, and CSP.
+- `pnpm dev`: starts the Vite dev server, compiles the main process with esbuild, then launches Electron with HMR.
+- `pnpm build`: builds the renderer and compiles the main process into runnable `dist/`.
+- `pnpm dist`: packages the application using electron-builder.
+- `pnpm test`: runs the full Vitest suite (12 test suites, 41 unit tests covering IPC, window policies, dev utilities, and plugin governance).
 
-## Features
+## 🌟 50+ Core Features Matrix
 
-- ⚡️ **Vite 8 + Vue 3.5 + TypeScript** with `<script setup>` and blazing fast HMR
-- 🧩 **Built-in Plugin System Engine**: supports plugin lifecycles (`setup` / `teardown`), isolated storage, dynamic route injection, status bar widgets, command extension registration, and dedicated settings dialogs
-- 🌐 **Plugin Marketplace & Community Store**: dynamic hot-loading, one-click install/uninstall for community plugins (Pomodoro Timer, Clipboard History, Color Palette, and REST API Client)
-- 🔍 **Raycast-style Command Palette (`Ctrl+K` / `Cmd+K`)**: instant fuzzy search, route jumping, system actions, and aggregated plugin commands
-- ⌨️ **Keyboard Shortcuts Cheat Sheet (`Ctrl+/` / `Cmd+/`)**: searchable interactive cheat sheet overlay for window actions, navigation, and plugin shortcuts
-- 🗂️ **Multi-Tab Workspace (TabBar)**: IDE-like top tabs, route history tracking, pinned home tab, and batch close actions
-- 🎵 **Synthetic Audio Feedback Engine (Web Audio)**: zero-dependency programmatic sound effects (click, toggle, success, alert) with customizable toggles
-- ⚙️ **Obsidian-style Plugin Settings Modal**: declare custom `settingsComponent` per plugin with isolated persistent storage
-- 🖥️ **Modern Desktop Shell**: collapsible sidebar, bottom status bar, and frameless custom titlebar
-- 🌓 **Full Dark & Light Themes**: seamless switching between Light, Dark, and System Auto modes with Element Plus integration
-- ⌨️ **Global Shortcut**: default `CommandOrControl+Shift+Space` to quickly show/hide window from anywhere
-- 📐 **Window State Persistence & Multi-Screen Healing**: saves window bounds/coordinates across sessions with auto-recovery for disconnected displays
-- 📥 **System Tray (Tray)**: system tray icon, context menu, click to restore, and minimize-to-tray on close
-- 🛠️ **Native System APIs**: native file open/save dialogs, directory picker, system clipboard read/write, native notifications, and login item settings
-- 🧰 **Three Built-in Demo Plugins**: Hardware & System Monitor, Quick Notes with isolated storage, and Developer Toolbox
-- 🖥️ **Electron 45** with context isolation and the sandbox on, and with Node integration and `<webview>` off. Documents get a CSP
-- 🪟 **Frameless window + custom title bar**: minimize, maximize, restore, double-click zoom, and close
-- 🔄 **Auto update** via `electron-updater`, with a built-in update dialog (check → download progress → install)
-- 🧩 **Multi-window support**: the main process handles every `window.open` with a strict whitelist of options
-- 📦 **Custom `app://` protocol** for loading pages in production, with `history` router mode supported
-- 🎨 **Element Plus** imported on demand, plus auto-imported `vue` / `vue-router` / `pinia` APIs
-- 🌐 **Axios wrapper** with environment variable support, safe parameter encoding, and offline detection
-- 🧹 **ESLint 10 + Prettier**, `vue-tsc` type checking, and 100% Vitest unit test suite
-- 🔒 **Single instance**: launching the app again focuses the existing window
+### 🛠️ 1. Developer Toolbox Matrix (15+ Tools)
+- **Diff Checker**: side-by-side / unified line-level difference highlighting with added/removed stats
+- **Regex Playground**: real-time regex matching, flags switching, capture groups extractor, and built-in presets (Email, Phone, IP, URL, Chinese characters)
+- **Hash & Checksum Studio**: instant calculation of MD5, SHA-1, SHA-256, and SHA-512 with uppercase toggle and integrity matching
+- **Password & Secret Generator**: customizable character sets, ambiguous character exclusion, real-time strength meter, and batch generation
+- **UUID / NanoID Generator**: UUID v4 generation, customizable casing, hyphen removal, and bulk generation
+- **JWT Token Decoder**: offline inspection of Header & Payload, expiration verification, and signing algorithm display
+- **URL & Query Parser**: URL encoding/decoding, query parameter breakdown table, and bi-directional editing
+- **JSON Formatter & Minifier**: structural formatting, syntax error detection, and compact compression
+- **Timestamp & Date Converter**: real-time microsecond timestamp, converter to readable date strings, and datetime picker
+- **Base64 Encoder/Decoder**: offline UTF-8 safe Base64 conversion
+- **Multi-Format Color Converter**: mutual conversions among HEX, RGB, RGBA, HSL, and HSLA models with color previews
+- **Case & Naming Style Converter**: camelCase, PascalCase, kebab-case, snake_case, CONSTANT_CASE, plus word and character counts
+- **CSS Visualizer**: interactive Linear/Radial Gradient generator & Box-Shadow visualizer with one-click CSS copy
+- **HTML Entities Tool**: bidirectional HTML entity encoding and decoding
+- **Quick Scratchpad**: automatic persistent local autosave with one-click `.txt` file export
+
+### 🖥️ 2. Desktop Shell & Native Window Controls (12+ Features)
+- **Always-on-Top Toggle**: title bar pin icon, status bar indicator, and real-time state synchronization
+- **Smooth Window Opacity**: 50% ~ 100% opacity slider for multi-tasking reference
+- **Window Screenshot to Clipboard**: captures native window rendering via `win.capturePage()` and writes directly to system clipboard
+- **Window Re-center Action**: immediately repositions the window to the center of the active monitor
+- **Preset Resolution Switching**: quick switches between 1024x768, 1280x800, and 1440x900 standard display resolutions
+- **Global View Zoom**: zoom in, zoom out, and reset zoom (Ctrl++, Ctrl+-, Ctrl+0) from 80% to 150%
+- **Network Latency Ping Monitor**: measures round-trip time every 5s with colored latency badge in the status bar
+- **Main Process & System Memory Widget**: monitors private working set memory usage of Node/Electron processes in real-time
+- **High-Precision System Clock**: real-time digital clock displayed in the bottom status bar
+- **Cache & Local Storage Cleaner**: visual metrics for LocalStorage keys/sizes with one-click cache purge and app reload
+- **Auto Launch at Login**: configurable startup behavior on system boot
+- **Multi-Screen Healing**: saves window bounds and repairs out-of-screen window positioning gracefully
+
+### 🧩 3. Plugin Engine & Governance Suite (10+ Features)
+- **Plugin Lifecycle Hooks**: declarative `setup` and `teardown` support
+- **Full Plugin Data Backup**: exports all plugin states and persistent storage into a single JSON backup file
+- **One-Click Data Restore**: imports and validates JSON backup files to restore plugin state across installations
+- **Batch Enable & Disable**: bulk-toggle all installed plugins with a single click
+- **Multi-Dimensional Marketplace Sorting**: sort community plugins by Recommended, Most Stars ⭐, Most Downloads 📥, or Alphabetical (A-Z)
+- **Marketplace Category Filtering**: filter by Productivity, DevTools, or Utilities
+- **Obsidian-Style Custom Settings**: plugins can declare dedicated configuration components accessible via the plugin center
+- **Dynamic Extension Injection**: inject components into routes, header actions, sidebar menus, and bottom status bar slots
+- **Global Event Bus**: decoupled pub/sub communication bridge across plugins and host applications
+- **Isolated Storage Namespaces**: plugins default to separate storage keys preventing collision
+
+### 🚀 4. Rich Built-in Productivity Plugins (10 Installed Plugins)
+- 📝 **Markdown Notebook (`markdown-notebook`)**: split-screen live preview, syntax insertion bar, word count, and `.md` file export
+- 🔐 **Snippet Vault (`snippet-vault`)**: multi-language code snippet manager with language filtering, search, and one-click copy
+- 💰 **Expense Tracker (`expense-tracker`)**: income and expense logging, category breakdown, net balance, and JSON export
+- 📅 **Habit Tracker (`habit-tracker`)**: daily goal check-ins, continuous streak calculation, and 7-day heatmap matrix
+- 🎨 **Canvas Sketchpad (`canvas-sketch`)**: lightweight HTML5 Canvas drawing, adjustable brush sizes/colors, eraser, and PNG export
+- ⏱️ **Precision Stopwatch (`stopwatch-timer`)**: millisecond-level timer with split-time Lap tracking and lap history table
+- 🍅 **Pomodoro Timer (`pomodoro-timer`)**: focus/break countdown intervals, native completion notifications, and cumulative time logs
+- 📋 **Clipboard History (`clipboard-history`)**: background clipboard tracking, fuzzy search, and one-click clipboard restoration
+- 🎨 **Color Palette (`color-palette`)**: Apple, Tailwind, and Nord modern palettes with WCAG accessibility contrast tester
+- 🌐 **REST API Client (`api-client`)**: lightweight HTTP playground with parameter configuration and JSON response parser
+
+### 💎 5. Modern Desktop UX & System Architecture (8+ Features)
+- **Raycast-style Command Palette (`Ctrl+K`)**: instant fuzzy search, route jumping, and command execution
+- **Shortcuts Cheat Sheet (`Ctrl+/`)**: interactive overlay listing all system and plugin hotkeys
+- **Multi-Tab Workspace (TabBar)**: IDE-style top tabs with pin and context menu batch actions
+- **Synthetic Web Audio System**: zero-asset synthetic audio feedback for micro-interactions (clicks, toggles, alerts)
+- **Theme Engine**: Light, Dark, and System Auto modes with Element Plus deep styling
+- **Global Shortcut**: default `CommandOrControl+Shift+Space` to summon/hide window
+- **System Tray (Tray)**: tray icon, custom menu, background running, and close-to-tray protection
+- **Frameless Window with Uncaught Exception Guard**: crash prevention and error logging for main process exceptions
 
 ## Getting Started
 

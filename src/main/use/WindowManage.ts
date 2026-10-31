@@ -2,7 +2,7 @@ import {
   app,
   BrowserWindow,
   BrowserWindowConstructorOptions,
-  clipboard,
+  clipboard as electronClipboard,
   IpcMainInvokeEvent,
   WebContents,
   ipcMain,
@@ -201,8 +201,9 @@ export class WindowManage {
       if (!win) return { success: false }
       try {
         const image = await win.capturePage()
-        clipboard.writeImage(image)
-        return { success: true, dataUrl: image.toDataURL() }
+        const dataUrl = image.toDataURL()
+        await electronClipboard.writeText(dataUrl)
+        return { success: true, dataUrl }
       } catch (err) {
         LogManage.log(`视窗截图失败: ${err}`)
         return { success: false }
