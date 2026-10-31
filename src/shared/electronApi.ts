@@ -17,7 +17,15 @@ export const IpcChannel = {
   closeWindow: 'close-window',
   onMaximizeWindow: 'on-maximize-window',
   onUnMaximizeWindow: 'on-un-maximize-window',
-  electronLog: 'electron-log'
+  electronLog: 'electron-log',
+  systemGetInfo: 'system-get-info',
+  dialogOpenFile: 'dialog-open-file',
+  dialogSaveFile: 'dialog-save-file',
+  clipboardRead: 'clipboard-read',
+  clipboardWrite: 'clipboard-write',
+  notificationShow: 'notification-show',
+  systemGetLoginItem: 'system-get-login-item',
+  systemSetLoginItem: 'system-set-login-item'
 } as const
 
 export interface DownloadProgressInfo {
@@ -57,4 +65,65 @@ export interface ElectronWindowApi {
 export interface ElectronLogApi {
   /** Receives the log text only. Returns a function that removes the listener. */
   log: (callback: (text: string) => void) => () => void
+}
+
+export interface SystemInfo {
+  platform: string
+  arch: string
+  osRelease: string
+  cpuModel: string
+  totalMemory: number
+  freeMemory: number
+  electronVersion: string
+  nodeVersion: string
+  chromeVersion: string
+  v8Version: string
+  appVersion: string
+  isPackaged: boolean
+}
+
+export interface OpenFileDialogOptions {
+  title?: string
+  defaultPath?: string
+  buttonLabel?: string
+  filters?: Array<{ name: string; extensions: string[] }>
+  properties?: Array<
+    | 'openFile'
+    | 'openDirectory'
+    | 'multiSelections'
+    | 'showHiddenFiles'
+    | 'createDirectory'
+    | 'promptToCreate'
+    | 'noResolveAliases'
+    | 'treatPackageAsDirectory'
+    | 'dontAddToRecent'
+  >
+}
+
+export interface SaveFileDialogOptions {
+  title?: string
+  defaultPath?: string
+  buttonLabel?: string
+  filters?: Array<{ name: string; extensions: string[] }>
+}
+
+export interface NotificationOptions {
+  title: string
+  body: string
+  silent?: boolean
+}
+
+export interface ElectronSystemApi {
+  getSystemInfo: () => Promise<SystemInfo>
+  openFileDialog: (
+    options?: OpenFileDialogOptions
+  ) => Promise<{ canceled: boolean; filePaths: string[] }>
+  saveFileDialog: (
+    options?: SaveFileDialogOptions
+  ) => Promise<{ canceled: boolean; filePath?: string }>
+  clipboardReadText: () => Promise<string>
+  clipboardWriteText: (text: string) => Promise<void>
+  showNotification: (options: NotificationOptions) => Promise<boolean>
+  getLoginItemSettings: () => Promise<{ openAtLogin: boolean }>
+  setLoginItemSettings: (openAtLogin: boolean) => Promise<void>
 }

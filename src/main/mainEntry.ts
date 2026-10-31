@@ -6,6 +6,7 @@ import { getDevServerUrl } from './use/devServerUrl'
 import { Updater } from './use/Updater'
 import { WindowManage } from './use/WindowManage'
 import { LogManage } from './use/LogManage'
+import { SystemManage } from './use/SystemManage'
 
 // 开发时 Vite 和 CSP 的提示很吵。打包后保留警告，方便发现真正的安全配置问题。
 if (!app.isPackaged) {
@@ -95,4 +96,7 @@ app.whenReady().then(async () => {
 
   // 窗口管理：注册窗口创建处理
   WindowManage.regWindowCreateHandle(win)
+
+  // 注册原生系统能力 IPC
+  SystemManage.regSystemIpc()
 })

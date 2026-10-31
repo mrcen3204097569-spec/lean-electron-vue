@@ -1,6 +1,7 @@
 import type {
   ElectronAppUpdateApi,
   ElectronLogApi,
+  ElectronSystemApi,
   ElectronWindowApi
 } from '../../shared/electronApi'
 
@@ -14,5 +15,7 @@ declare global {
     electronWindowApi?: ElectronWindowApi
     /** 未注入 preload 的子窗口上不存在。 */
     electronLogApi?: ElectronLogApi
+    /** 系统原生能力与信息 API */
+    electronSystemApi?: ElectronSystemApi
   }
 }

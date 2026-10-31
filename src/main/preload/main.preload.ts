@@ -4,7 +4,11 @@ import {
   type DownloadProgressInfo,
   type ElectronAppUpdateApi,
   type ElectronLogApi,
+  type ElectronSystemApi,
   type ElectronWindowApi,
+  type OpenFileDialogOptions,
+  type NotificationOptions,
+  type SaveFileDialogOptions,
   type UpdateNotice
 } from '../../shared/electronApi'
 
@@ -46,6 +50,22 @@ const electronLogApi: ElectronLogApi = {
   log: (callback) => subscribe<[string]>(IpcChannel.electronLog, callback)
 }
 
+const electronSystemApi: ElectronSystemApi = {
+  getSystemInfo: () => ipcRenderer.invoke(IpcChannel.systemGetInfo),
+  openFileDialog: (options?: OpenFileDialogOptions) =>
+    ipcRenderer.invoke(IpcChannel.dialogOpenFile, options),
+  saveFileDialog: (options?: SaveFileDialogOptions) =>
+    ipcRenderer.invoke(IpcChannel.dialogSaveFile, options),
+  clipboardReadText: () => ipcRenderer.invoke(IpcChannel.clipboardRead),
+  clipboardWriteText: (text: string) => ipcRenderer.invoke(IpcChannel.clipboardWrite, text),
+  showNotification: (options: NotificationOptions) =>
+    ipcRenderer.invoke(IpcChannel.notificationShow, options),
+  getLoginItemSettings: () => ipcRenderer.invoke(IpcChannel.systemGetLoginItem),
+  setLoginItemSettings: (openAtLogin: boolean) =>
+    ipcRenderer.invoke(IpcChannel.systemSetLoginItem, openAtLogin)
+}
+
 contextBridge.exposeInMainWorld('electronAppUpdateApi', electronAppUpdateApi)
 contextBridge.exposeInMainWorld('electronWindowApi', electronWindowApi)
 contextBridge.exposeInMainWorld('electronLogApi', electronLogApi)
+contextBridge.exposeInMainWorld('electronSystemApi', electronSystemApi)
