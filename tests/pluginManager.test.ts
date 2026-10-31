@@ -133,4 +133,25 @@ describe('PluginManager Engine', () => {
     const disabledCmd = pluginManager.activeCommands.value.find((c) => c.id === 'test.run')
     expect(disabledCmd).toBeUndefined()
   })
+
+  it('supports custom plugin settingsComponent extension', () => {
+    const fakeSettingsComp = { template: '<div>config</div>' }
+    const settingsPlugin = definePlugin({
+      metadata: {
+        id: 'test-settings',
+        name: '自定义设置测试',
+        version: '1.0.0',
+        description: '测试'
+      },
+      settingsComponent: fakeSettingsComp as any
+    })
+
+    pluginManager.register(settingsPlugin)
+    const rec = pluginManager.allPlugins.value.find((p) => p.metadata.id === 'test-settings')
+    expect(rec).toBeDefined()
+    expect(rec?.hasSettings).toBe(true)
+
+    const pluginDef = pluginManager.getPlugin('test-settings')
+    expect(pluginDef?.settingsComponent).toStrictEqual(fakeSettingsComp)
+  })
 })

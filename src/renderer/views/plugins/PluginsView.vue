@@ -70,6 +70,17 @@
 
           <div class="action-buttons">
             <el-button
+              v-if="plugin.hasSettings"
+              type="default"
+              size="small"
+              text
+              :icon="Setting"
+              @click="openPluginSettings(plugin.metadata.id)"
+            >
+              配置
+            </el-button>
+
+            <el-button
               v-if="plugin.enabled && getPluginFirstRoute(plugin.metadata.id)"
               type="primary"
               size="small"
@@ -84,15 +95,35 @@
     </div>
 
     <el-empty v-else description="未搜索到符合条件的插件" />
+
+    <!-- 插件专属配置弹窗 (Obsidian 风格) -->
+    <el-dialog
+      v-model="settingsDialogVisible"
+      :title="currentSettingsPluginTitle"
+      width="560px"
+      destroy-on-close
+    >
+      <component
+        :is="currentSettingsComponent"
+        v-if="currentSettingsComponent"
+        :plugin-id="currentSettingsPluginId"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup name="PluginsView">
-import { Box } from '@element-plus/icons-vue'
+import { shallowRef, ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { Box, Setting } from '@element-plus/icons-vue'
 import { pluginManager } from '@/plugin/pluginManager'
 
 const router = useRouter()
 const searchKeyword = ref('')
+const settingsDialogVisible = ref(false)
+const currentSettingsPluginId = ref('')
+const currentSettingsPluginTitle = ref('')
+const currentSettingsComponent = shallowRef<any>(null)
 
 const allPlugins = computed(() => pluginManager.allPlugins.value)
 const activeCount = computed(() => allPlugins.value.filter((p) => p.enabled).length)
@@ -111,6 +142,16 @@ const filteredPlugins = computed(() => {
 
 async function togglePlugin(id: string) {
   await pluginManager.toggle(id)
+}
+
+function openPluginSettings(pluginId: string) {
+  const plugin = pluginManager.getPlugin(pluginId)
+  if (plugin?.settingsComponent) {
+    currentSettingsPluginId.value = pluginId
+    currentSettingsPluginTitle.value = `${plugin.metadata.name} - 参数配置`
+    currentSettingsComponent.value = plugin.settingsComponent
+    settingsDialogVisible.value = true
+  }
 }
 
 function getPluginFirstRoute(pluginId: string): string | null {

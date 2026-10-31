@@ -252,11 +252,20 @@ class PluginManager {
     return record.enabled ? this.disable(pluginId) : this.enable(pluginId)
   }
 
+  getPlugin(pluginId: string): PluginDefinition | undefined {
+    return this.records.get(pluginId)?.definition
+  }
+
+  getPluginStorage(pluginId: string): PluginStorage {
+    return this.createStorage(pluginId)
+  }
+
   // 响应式数据导出
   readonly allPlugins = computed(() => {
     return Array.from(this.records.values()).map((r) => ({
       metadata: r.definition.metadata,
-      enabled: r.enabled
+      enabled: r.enabled,
+      hasSettings: Boolean(r.definition.settingsComponent)
     }))
   })
 

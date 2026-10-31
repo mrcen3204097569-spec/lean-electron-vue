@@ -76,6 +76,7 @@ export interface PluginDefinition {
   setup?: (ctx: PluginContext) => void | Promise<void>
   teardown?: (ctx: PluginContext) => void | Promise<void>
   extensions?: PluginExtension
+  settingsComponent?: Component
 }
 
 export interface PluginRuntimeRecord {

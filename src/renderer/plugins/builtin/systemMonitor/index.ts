@@ -3,6 +3,7 @@ import { definePlugin } from '@/plugin/pluginManager'
 import { router } from '@/router'
 import SystemMonitorView from './SystemMonitorView.vue'
 import SystemStatusWidget from './SystemStatusWidget.vue'
+import SystemMonitorSettings from './SystemMonitorSettings.vue'
 
 export const systemMonitorPlugin = definePlugin({
   metadata: {
@@ -14,6 +15,7 @@ export const systemMonitorPlugin = definePlugin({
     icon: 'Cpu',
     tags: ['系统', '监控', '硬件']
   },
+  settingsComponent: markRaw(SystemMonitorSettings),
   extensions: {
     views: [
       {
