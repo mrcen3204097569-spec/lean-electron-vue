@@ -21,17 +21,22 @@
 
 ## 特性
 
-- ⚡️ **Vite 8 + Vue 3.5 + TypeScript**，`<script setup>` 写法
-- 🖥️ **Electron 45**，默认开启上下文隔离和 sandbox，渲染进程关闭 Node 集成和 `<webview>`，所有能力通过 `preload` 暴露。页面带有 CSP；只有开发环境会关掉 Electron 的安全警告
-- 🪟 **无边框窗口 + 自定义标题栏**：最小化 / 最大化 / 还原 / 关闭，以及窗口最大化状态同步
+- ⚡️ **Vite 8 + Vue 3.5 + TypeScript**，`<script setup>` 写法，秒级极速热重载
+- 🧩 **原生插件化架构 (Plugin Engine)**：支持插件生命周期（`setup` / `teardown`）、独立存储空间、动态路由注入、状态栏部件挂载与顶部快捷操作注入
+- 🖥️ **现代桌面工作台 Shell**：可折叠侧边导航栏、底部实时状态栏、无边框顶部拖曳标题栏
+- 🌓 **全套暗黑/明亮主题**：支持浅色模式、深色模式与跟随系统自动切换，Element Plus 全局深度适配
+- 📥 **系统托盘 (Tray)**：常驻系统托盘图标、右键菜单、单击唤醒与退出时最小化到托盘保护
+- 🛠️ **丰富系统级能力 IPC**：原生打开/保存文件对话框、文件夹选择、系统剪贴板读写、原生通知、开机自启配置
+- 🧰 **内置三大演示插件**：实时硬件运行监控、桌面快捷便签、开发者常用工具箱
+- 🖥️ **Electron 45**，默认开启上下文隔离和 sandbox，渲染进程关闭 Node 集成和 `<webview>`，所有能力通过 `preload` 暴露。页面带有 CSP
+- 🪟 **无边框窗口 + 自定义标题栏**：最小化 / 最大化 / 还原 / 关闭，双击标题栏缩放，窗口最大化状态同步
 - 🔄 **自动更新**：基于 `electron-updater`，内置更新弹窗（检查 → 下载进度 → 安装），更新文案可在打包时配置
-- 🧩 **多窗口 / 子窗口**：`window.open` 由主进程接管。渲染进程只能改白名单里的窗口选项，并用 `preloadMain` 选择是否注入 preload；外链交给系统浏览器
-- 📦 **自定义 `app://` 协议**：生产环境下通过自定义协议加载页面，支持 `history` 路由模式
+- 🧩 **多窗口 / 子窗口**：`window.open` 由主进程接管，白名单窗口参数控制，父子窗口双向就绪通信
+- 📦 **自定义 `app://` 协议**：生产环境下通过自定义协议加载页面，原生支持 `history` 路由模式
 - 🎨 **Element Plus** 按需自动导入，`vue` / `vue-router` / `pinia` API 自动导入
-- 🗂️ **约定式模块**：`router/modules/*.router.ts`、`api/modules/*.ts` 自动注册
-- 🌐 **Axios 封装**：统一拦截、错误提示、断网检测
-- 🧹 **ESLint 10 (flat config) + Prettier**，`vue-tsc` 类型检查
-- 🔒 **单实例**：再次启动会聚焦已经打开的窗口。安装包示例为 Windows NSIS、macOS dmg、Linux AppImage
+- 🌐 **Axios 封装**：环境变量支持、请求拦截与安全格式化、断网检测
+- 🧹 **ESLint 10 (flat config) + Prettier**，`vue-tsc` 类型检查，全套 Vitest 单元测试覆盖
+- 🔒 **单实例应用**：重复启动自动唤醒并聚焦前台窗口
 
 ## 技术栈
 
@@ -180,6 +185,65 @@ window.electronWindowApi.maximizeWindow()
 ```
 
 监听类 API 不把 `IpcRendererEvent` 传给渲染进程，并返回取消订阅函数，在 `onUnmounted` 里调用。通道名和接口定义在 `src/shared/electronApi.ts`，`src/renderer/types/electronRender.d.ts` 引用同一份类型。新增 API 时改这一处，并在 preload 里实现对应接口。
+
+### 插件系统开发指南
+
+本模板内置轻量级纯 TypeScript 插件引擎，支持声明式与编程式两种扩展方式：
+
+```ts
+import { markRaw } from 'vue'
+import { definePlugin } from '@/plugin/pluginManager'
+import MyWidget from './MyWidget.vue'
+import MyPageView from './MyPageView.vue'
+
+export const myCustomPlugin = definePlugin({
+  metadata: {
+    id: 'my-custom-plugin',
+    name: '自定义演示插件',
+    version: '1.0.0',
+    description: '演示如何在模板中注册独立扩展',
+    author: 'Developer'
+  },
+  // 1. 声明式扩展点
+  extensions: {
+    views: [
+      {
+        id: 'my-view',
+        path: '/plugins/my-page',
+        title: '插件独立页面',
+        component: markRaw(MyPageView),
+        inNavigation: true // 自动注入侧边栏
+      }
+    ],
+    statusBarItems: [
+      {
+        id: 'my-status-item',
+        alignment: 'left',
+        component: markRaw(MyWidget) // 自动挂载至底部状态栏
+      }
+    ],
+    headerActions: [
+      {
+        id: 'my-action',
+        title: '快捷功能',
+        action: () => alert('点击了插件快捷按钮')
+      }
+    ]
+  },
+  // 2. 编程式生命周期
+  setup(ctx) {
+    // 插件独立隔离存储
+    ctx.storage.set('installedAt', Date.now())
+    // 跨插件事件订阅与广播
+    ctx.on('custom-event', (data) => console.log('收到事件:', data))
+  },
+  teardown(ctx) {
+    console.log('插件停用清理')
+  }
+})
+```
+
+在 `src/renderer/plugins/builtin/index.ts` 中通过 `pluginManager.register(myCustomPlugin)` 注册即可，用户可在「插件扩展中心」热启用或停用。
 
 ### 自动更新
 

@@ -21,17 +21,22 @@ This template doesn't use a third-party integration such as `electron-vite` or `
 
 ## Features
 
-- ⚡️ **Vite 8 + Vue 3.5 + TypeScript** with `<script setup>`
-- 🖥️ **Electron 45** with context isolation and the sandbox on, and with Node integration and `<webview>` off. Native capabilities are exposed through `preload`. Documents get a CSP. Electron's security warnings are silenced only in development.
-- 🪟 **Frameless window + custom title bar**: minimize, maximize, restore and close, with the maximized state synced to the UI
-- 🔄 **Auto update** via `electron-updater`, with a built-in update dialog (check → download progress → install). The update notes are set at build time.
-- 🧩 **Multi-window support**: the main process handles every `window.open`. The renderer may only set a whitelist of window options and chooses the built-in preload with `preloadMain`. External links open in the system browser.
+- ⚡️ **Vite 8 + Vue 3.5 + TypeScript** with `<script setup>` and blazing fast HMR
+- 🧩 **Built-in Plugin System Engine**: supports plugin lifecycles (`setup` / `teardown`), isolated storage, dynamic route injection, status bar widgets, and header actions
+- 🖥️ **Modern Desktop Shell**: collapsible sidebar, bottom status bar, and frameless custom titlebar
+- 🌓 **Full Dark & Light Themes**: seamless switching between Light, Dark, and System Auto modes with Element Plus integration
+- 📥 **System Tray (Tray)**: system tray icon, context menu, click to restore, and minimize-to-tray on close
+- 🛠️ **Native System APIs**: native file open/save dialogs, directory picker, system clipboard read/write, native notifications, and login item settings
+- 🧰 **Three Built-in Demo Plugins**: Hardware & System Monitor, Quick Notes with isolated storage, and Developer Toolbox
+- 🖥️ **Electron 45** with context isolation and the sandbox on, and with Node integration and `<webview>` off. Documents get a CSP
+- 🪟 **Frameless window + custom title bar**: minimize, maximize, restore, double-click zoom, and close
+- 🔄 **Auto update** via `electron-updater`, with a built-in update dialog (check → download progress → install)
+- 🧩 **Multi-window support**: the main process handles every `window.open` with a strict whitelist of options
 - 📦 **Custom `app://` protocol** for loading pages in production, with `history` router mode supported
 - 🎨 **Element Plus** imported on demand, plus auto-imported `vue` / `vue-router` / `pinia` APIs
-- 🗂️ **Convention-based modules**: files in `router/modules/*.router.ts` and `api/modules/*.ts` are registered automatically
-- 🌐 **Axios wrapper** with request and response interceptors, error messages and offline detection
-- 🧹 **ESLint 10 (flat config) + Prettier**, plus `vue-tsc` type checking
-- 🔒 **Single instance**: launching the app again focuses the existing window. Package examples are Windows NSIS, macOS dmg, and Linux AppImage
+- 🌐 **Axios wrapper** with environment variable support, safe parameter encoding, and offline detection
+- 🧹 **ESLint 10 + Prettier**, `vue-tsc` type checking, and 100% Vitest unit test suite
+- 🔒 **Single instance**: launching the app again focuses the existing window
 
 ## Getting Started
 
