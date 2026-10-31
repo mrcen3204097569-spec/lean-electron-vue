@@ -8,6 +8,7 @@ import { WindowManage } from './use/WindowManage'
 import { LogManage } from './use/LogManage'
 import { SystemManage } from './use/SystemManage'
 import { TrayManage } from './use/TrayManage'
+import { WindowStateManage } from './use/WindowStateManage'
 
 // 开发时 Vite 和 CSP 的提示很吵。打包后保留警告，方便发现真正的安全配置问题。
 if (!app.isPackaged) {
@@ -53,7 +54,14 @@ app.whenReady().then(async () => {
   const devServerUrl = getDevServerUrl()
   installContentSecurityPolicy(devServerUrl)
 
+  const windowState = WindowStateManage.loadState()
+
   const win = new BrowserWindow({
+    // 恢复记忆的窗口尺寸与位置
+    x: windowState.x,
+    y: windowState.y,
+    width: windowState.width,
+    height: windowState.height,
     // 设置为false不显示窗口，待主页面资源加载完成再手动显示
     show: false,
     // 无边框窗口
@@ -103,4 +111,10 @@ app.whenReady().then(async () => {
 
   // 初始化系统托盘
   TrayManage.initTray(win)
+
+  // 跟踪并持久化窗口位置与尺寸
+  WindowStateManage.track(win)
+  if (windowState.isMaximized) {
+    win.maximize()
+  }
 })
