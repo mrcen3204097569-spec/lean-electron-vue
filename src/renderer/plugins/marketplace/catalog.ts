@@ -3,6 +3,12 @@ import { pomodoroPlugin } from './pomodoro'
 import { clipboardPlugin } from './clipboard'
 import { colorPalettePlugin } from './colorPalette'
 import { apiClientPlugin } from './apiClient'
+import { markdownNotebookPlugin } from './markdownNotebook'
+import { snippetVaultPlugin } from './snippetVault'
+import { expenseTrackerPlugin } from './expenseTracker'
+import { habitTrackerPlugin } from './habitTracker'
+import { canvasSketchPlugin } from './canvasSketch'
+import { stopwatchPlugin } from './stopwatch'
 
 export interface MarketplacePluginItem {
   id: string
@@ -71,5 +77,83 @@ export const marketplaceCatalog: MarketplacePluginItem[] = [
     category: 'devtools',
     tags: ['API', 'HTTP', '调试', '接口'],
     definition: apiClientPlugin
+  },
+  {
+    id: 'markdown-notebook',
+    name: 'Markdown 实时笔记本',
+    version: '1.0.0',
+    author: 'DocCraft',
+    description: '双栏即时渲染排版、常用语法快捷插入、字数统计与标准 Markdown 文件导出',
+    icon: 'Document',
+    stars: 189,
+    downloads: '3.6k',
+    category: 'productivity',
+    tags: ['笔记', 'Markdown', '文档', '写作'],
+    definition: markdownNotebookPlugin
+  },
+  {
+    id: 'snippet-vault',
+    name: '代码片段金库',
+    version: '1.0.0',
+    author: 'DevVault',
+    description: '常用代码片段、脚手架与配置文件跨语言集中管理、按语言过滤与一键复制',
+    icon: 'DocumentCopy',
+    stars: 215,
+    downloads: '4.2k',
+    category: 'devtools',
+    tags: ['代码', '片段', '开发', 'TypeScript'],
+    definition: snippetVaultPlugin
+  },
+  {
+    id: 'expense-tracker',
+    name: '极简日常记账',
+    version: '1.0.0',
+    author: 'MoneyCraft',
+    description: '收支流水记录、分类统计、净结余自动计算与本地 JSON 导出',
+    icon: 'Wallet',
+    stars: 145,
+    downloads: '2.9k',
+    category: 'productivity',
+    tags: ['记账', '财务', '消费', '效率'],
+    definition: expenseTrackerPlugin
+  },
+  {
+    id: 'habit-tracker',
+    name: '习惯打卡追踪',
+    version: '1.0.0',
+    author: 'HabitCraft',
+    description: '自律习惯打卡、连续坚持天数记录与最近打卡热力方块可视化',
+    icon: 'Calendar',
+    stars: 167,
+    downloads: '3.1k',
+    category: 'productivity',
+    tags: ['打卡', '习惯', '坚持', '自律'],
+    definition: habitTrackerPlugin
+  },
+  {
+    id: 'canvas-sketch',
+    name: '草图白板涂鸦',
+    version: '1.0.0',
+    author: 'SketchLab',
+    description: '轻量 HTML5 Canvas 手绘草图、流程涂鸦与一键导出 PNG 图像',
+    icon: 'EditPen',
+    stars: 112,
+    downloads: '2.1k',
+    category: 'utilities',
+    tags: ['画板', '草图', '涂鸦', 'Canvas'],
+    definition: canvasSketchPlugin
+  },
+  {
+    id: 'stopwatch-timer',
+    name: '高精度秒表与计次',
+    version: '1.0.0',
+    author: 'TimeCraft',
+    description: '毫秒级秒表计时、支持分段计次 (Lap) 对比与耗时分析',
+    icon: 'Timer',
+    stars: 98,
+    downloads: '1.5k',
+    category: 'utilities',
+    tags: ['秒表', '计时', 'Lap', '效率'],
+    definition: stopwatchPlugin
   }
 ]
