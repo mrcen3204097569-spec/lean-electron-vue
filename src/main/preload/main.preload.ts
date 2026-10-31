@@ -64,7 +64,13 @@ const electronSystemApi: ElectronSystemApi = {
   setLoginItemSettings: (openAtLogin: boolean) =>
     ipcRenderer.invoke(IpcChannel.systemSetLoginItem, openAtLogin),
   getCloseToTray: () => ipcRenderer.invoke(IpcChannel.trayGetCloseToTray),
-  setCloseToTray: (enabled: boolean) => ipcRenderer.invoke(IpcChannel.traySetCloseToTray, enabled)
+  setCloseToTray: (enabled: boolean) => ipcRenderer.invoke(IpcChannel.traySetCloseToTray, enabled),
+  registerShortcut: (accelerator: string) =>
+    ipcRenderer.invoke(IpcChannel.shortcutRegister, accelerator),
+  unregisterShortcut: (accelerator: string) =>
+    ipcRenderer.invoke(IpcChannel.shortcutUnregister, accelerator),
+  onShortcut: (callback: (accelerator: string) => void) =>
+    subscribe<[string]>(IpcChannel.onGlobalShortcutTriggered, callback)
 }
 
 contextBridge.exposeInMainWorld('electronAppUpdateApi', electronAppUpdateApi)

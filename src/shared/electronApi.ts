@@ -27,7 +27,10 @@ export const IpcChannel = {
   systemGetLoginItem: 'system-get-login-item',
   systemSetLoginItem: 'system-set-login-item',
   traySetCloseToTray: 'tray-set-close-to-tray',
-  trayGetCloseToTray: 'tray-get-close-to-tray'
+  trayGetCloseToTray: 'tray-get-close-to-tray',
+  shortcutRegister: 'shortcut-register',
+  shortcutUnregister: 'shortcut-unregister',
+  onGlobalShortcutTriggered: 'on-global-shortcut-triggered'
 } as const
 
 export interface DownloadProgressInfo {
@@ -130,4 +133,7 @@ export interface ElectronSystemApi {
   setLoginItemSettings: (openAtLogin: boolean) => Promise<void>
   getCloseToTray: () => Promise<boolean>
   setCloseToTray: (enabled: boolean) => Promise<void>
+  registerShortcut: (accelerator: string) => Promise<boolean>
+  unregisterShortcut: (accelerator: string) => Promise<void>
+  onShortcut: (callback: (accelerator: string) => void) => () => void
 }

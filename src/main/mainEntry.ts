@@ -9,6 +9,7 @@ import { LogManage } from './use/LogManage'
 import { SystemManage } from './use/SystemManage'
 import { TrayManage } from './use/TrayManage'
 import { WindowStateManage } from './use/WindowStateManage'
+import { ShortcutManage } from './use/ShortcutManage'
 
 // 开发时 Vite 和 CSP 的提示很吵。打包后保留警告，方便发现真正的安全配置问题。
 if (!app.isPackaged) {
@@ -117,4 +118,7 @@ app.whenReady().then(async () => {
   if (windowState.isMaximized) {
     win.maximize()
   }
+
+  // 注册全局快捷键管理
+  ShortcutManage.init(win)
 })
