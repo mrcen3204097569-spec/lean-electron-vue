@@ -33,6 +33,15 @@
         <component :is="item.component" />
       </div>
 
+      <!-- 快捷键速查入口 -->
+      <div
+        class="status-item shortcuts-entry"
+        title="键盘快捷键速查 (Ctrl+/)"
+        @click="openShortcutsModal"
+      >
+        <span class="status-text">⌨️ 快捷键</span>
+      </div>
+
       <!-- 运行环境与版本号 -->
       <div class="status-item env-badge">
         <span class="status-text">{{ isDev ? 'DEV' : 'PROD' }}</span>
@@ -57,6 +66,10 @@ const activePluginCount = computed(() => {
 
 const updateOnlineStatus = () => {
   isOnline.value = window.navigator.onLine
+}
+
+const openShortcutsModal = () => {
+  window.dispatchEvent(new CustomEvent('open-shortcuts-modal'))
 }
 
 onMounted(() => {
@@ -96,6 +109,18 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
+
+  &.shortcuts-entry {
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--el-fill-color-light);
+      color: var(--el-color-primary);
+    }
+  }
 }
 
 .status-dot {

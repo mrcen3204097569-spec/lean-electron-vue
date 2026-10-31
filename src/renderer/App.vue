@@ -36,6 +36,9 @@
 
     <!-- 全局命令面板 (Ctrl+K) -->
     <CommandPalette />
+
+    <!-- 快捷键速查清单 (Ctrl+/) -->
+    <KeyboardShortcutsModal />
   </div>
 </template>
 
@@ -47,6 +50,7 @@ import SystemBarBottom from '@/components/system/SystemBarBottom.vue'
 import SystemAppUpdate from '@/components/system/SystemAppUpdate.vue'
 import SystemWindowShow from '@/components/system/SystemWindowShow.vue'
 import CommandPalette from '@/components/system/CommandPalette.vue'
+import KeyboardShortcutsModal from '@/components/system/KeyboardShortcutsModal.vue'
 
 const route = useRoute()
 

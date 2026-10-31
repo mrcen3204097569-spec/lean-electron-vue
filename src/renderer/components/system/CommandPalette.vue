@@ -188,6 +188,15 @@ const systemCommands = computed<Omit<PaletteItem, 'flatIndex'>[]>(() => [
     action: () => router.push('/settings')
   },
   {
+    id: 'action.shortcuts-sheet',
+    title: '打开键盘快捷键速查清单 (Cheat Sheet)',
+    subtitle: '查看全局与插件所有可用键盘快捷键',
+    category: '🛠️ 系统快捷操作',
+    shortcut: 'Ctrl+/',
+    icon: Tools,
+    action: () => window.dispatchEvent(new CustomEvent('open-shortcuts-modal'))
+  },
+  {
     id: 'action.toggle-theme',
     title: `切换为${currentTheme.value === 'dark' ? '浅色' : '暗黑'}主题`,
     subtitle: `当前运行模式: ${currentTheme.value}`,
