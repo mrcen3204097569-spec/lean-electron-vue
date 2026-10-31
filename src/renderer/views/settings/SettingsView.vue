@@ -52,7 +52,41 @@
         </div>
       </el-card>
 
-      <!-- 3. 环境与服务接口 -->
+      <!-- 3. 声音与触觉反馈 -->
+      <el-card shadow="never" class="settings-card">
+        <template #header>
+          <div class="card-title">
+            <el-icon><Bell /></el-icon>
+            <span>声音与交互反馈</span>
+          </div>
+        </template>
+        <div class="setting-item">
+          <div class="item-info">
+            <span class="item-label">操作音效反馈</span>
+            <span class="item-desc">在复制文本、完成番茄钟或切换开关时播放微交互提示音</span>
+          </div>
+          <el-switch v-model="soundEnabled" @change="handleSoundChange" />
+        </div>
+        <el-divider />
+        <div class="setting-item">
+          <div class="item-info">
+            <span class="item-label">音效试听</span>
+            <span class="item-desc">点击测试不同场景下的合成提示音</span>
+          </div>
+          <div class="sound-test-buttons">
+            <el-button size="small" @click="testSound('click')">按钮微点击</el-button>
+            <el-button size="small" @click="testSound('toggle')">开关声</el-button>
+            <el-button size="small" type="success" plain @click="testSound('success')">
+              成功提示音
+            </el-button>
+            <el-button size="small" type="warning" plain @click="testSound('alert')">
+              警示提示音
+            </el-button>
+          </div>
+        </div>
+      </el-card>
+
+      <!-- 4. 环境与服务接口 -->
       <el-card shadow="never" class="settings-card">
         <template #header>
           <div class="card-title">
@@ -106,23 +140,38 @@
 </template>
 
 <script lang="ts" setup name="SettingsView">
-import { Connection, InfoFilled, Monitor, Sunny } from '@element-plus/icons-vue'
+import { Bell, Connection, InfoFilled, Monitor, Sunny } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { currentTheme, setTheme, type ThemeMode } from '@/common/theme'
+import { isSoundEnabled, setSoundEnabled, playSound, type SoundType } from '@/common/sound'
 
 const isDev = import.meta.env.DEV
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
 
 const closeToTray = ref(false)
 const openAtLogin = ref(false)
+const soundEnabled = ref(isSoundEnabled.value)
 
 function handleThemeChange(val: string | number | boolean | undefined) {
   if (typeof val === 'string') {
     setTheme(val as ThemeMode)
+    playSound('toggle')
     ElMessage.success(
       `主题已切换为: ${val === 'auto' ? '跟随系统' : val === 'dark' ? '深色模式' : '浅色模式'}`
     )
   }
+}
+
+function handleSoundChange(val: boolean | string | number) {
+  setSoundEnabled(Boolean(val))
+  if (val) {
+    playSound('success')
+  }
+  ElMessage.success(val ? '已开启音效反馈' : '已关闭音效反馈')
+}
+
+function testSound(type: SoundType) {
+  playSound(type)
 }
 
 async function handleCloseToTrayChange(val: boolean | string | number) {
@@ -221,6 +270,12 @@ onMounted(async () => {
   .item-desc {
     font-size: 12px;
     color: var(--el-text-color-secondary, #909399);
+  }
+
+  .sound-test-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
   }
 
   .api-url-text {
