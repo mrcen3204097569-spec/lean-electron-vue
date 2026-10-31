@@ -1,32 +1,48 @@
 <template>
   <div class="root">
-    <!-- 基础顶部菜单栏 -->
+    <!-- 顶部自定义标题栏 -->
     <SystemBarTop :title="title" />
 
-    <!-- 更新组件，可选也可以自己写更新逻辑 -->
+    <!-- 中间主体：侧边栏 + 主内容区 -->
+    <div class="main-body">
+      <SystemSidebar v-if="!isDialogMode" />
+
+      <main class="content-container">
+        <router-view v-slot="{ Component }" class="router-view">
+          <transition
+            enter-active-class="animate__animated animate__fadeIn"
+            leave-active-class="animate__animated animate__fadeOut"
+            mode="out-in"
+          >
+            <component :is="Component" class="component" />
+          </transition>
+        </router-view>
+      </main>
+    </div>
+
+    <!-- 底部状态栏 -->
+    <SystemBarBottom v-if="!isDialogMode" />
+
+    <!-- 自动更新组件 -->
     <SystemAppUpdate />
 
-    <!-- 主进程窗口显示通知组件 -->
+    <!-- 主窗口就绪显示通知组件 -->
     <SystemWindowShow />
-
-    <!-- 路由组件 -->
-    <router-view v-slot="{ Component }" class="router-view">
-      <transition
-        enter-active-class="animate__animated animate__fadeIn"
-        leave-active-class="animate__animated animate__fadeOut"
-      >
-        <component :is="Component" class="component" />
-      </transition>
-    </router-view>
   </div>
 </template>
 
 <script setup lang="ts">
 import SystemBarTop from '@/components/system/SystemBarTop.vue'
+import SystemSidebar from '@/components/system/SystemSidebar.vue'
+import SystemBarBottom from '@/components/system/SystemBarBottom.vue'
 import SystemAppUpdate from '@/components/system/SystemAppUpdate.vue'
 import SystemWindowShow from '@/components/system/SystemWindowShow.vue'
 
 const route = useRoute()
+
+const isDialogMode = computed(() => {
+  return route.query.dialog === '1' || route.meta?.isDialog === true
+})
 
 const title = computed(() => {
   return (route.meta?.title as string) || (route.name as string) || '应用程序'
@@ -51,15 +67,29 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-color: var(--el-bg-color-page, #f5f7fa);
 }
 
-.animate__animated {
-  animation-duration: 0.25s !important;
+.main-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+.content-container {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+  background-color: var(--el-bg-color-page, #f5f7fa);
 }
 
 .router-view {
-  position: relative;
-  flex: 1;
-  overflow: auto;
+  min-height: 100%;
+}
+
+.animate__animated {
+  animation-duration: 0.2s !important;
 }
 </style>

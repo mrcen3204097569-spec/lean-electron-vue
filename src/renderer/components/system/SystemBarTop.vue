@@ -1,24 +1,45 @@
 <template>
   <div class="c-system-bar-top">
+    <div class="brand">
+      <img src="/vite.svg" alt="logo" class="brand__icon" />
+      <span class="brand__name">LeanApp</span>
+    </div>
+
     <div class="title" @dblclick="windowIsMax ? restoreWindow() : maximizeWindow()">
       {{ title }}
     </div>
 
-    <div class="options">
-      <div class="options__item minimize">
-        <el-button text plain :icon="Minus" @click="minimizeWindow"></el-button>
+    <div class="actions">
+      <!-- 插件注入的快捷操作 -->
+      <div
+        v-for="item in pluginManager.activeHeaderActions.value"
+        :key="item.id"
+        class="actions__plugin-item"
+      >
+        <el-tooltip :content="item.title" placement="bottom">
+          <el-button text plain size="small" @click="item.action">
+            <component :is="item.icon" v-if="item.icon" />
+            <span v-else>{{ item.title }}</span>
+          </el-button>
+        </el-tooltip>
       </div>
 
-      <div v-if="!windowIsMax" class="options__item maximize">
-        <el-button text plain :icon="FullScreen" @click="maximizeWindow"></el-button>
-      </div>
+      <div class="options">
+        <div class="options__item minimize">
+          <el-button text plain :icon="Minus" @click="minimizeWindow"></el-button>
+        </div>
 
-      <div v-if="windowIsMax" class="options__item maximize">
-        <el-button text plain :icon="CopyDocument" @click="restoreWindow"></el-button>
-      </div>
+        <div v-if="!windowIsMax" class="options__item maximize">
+          <el-button text plain :icon="FullScreen" @click="maximizeWindow"></el-button>
+        </div>
 
-      <div class="options__item close">
-        <el-button text plain :icon="Close" @click="closeWindow"></el-button>
+        <div v-if="windowIsMax" class="options__item maximize">
+          <el-button text plain :icon="CopyDocument" @click="restoreWindow"></el-button>
+        </div>
+
+        <div class="options__item close">
+          <el-button text plain :icon="Close" @click="closeWindow"></el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -26,6 +47,7 @@
 
 <script lang="ts" setup name="SystemBarTop">
 import { Close, CopyDocument, FullScreen, Minus } from '@element-plus/icons-vue'
+import { pluginManager } from '@/plugin/pluginManager'
 
 withDefaults(defineProps<{ title?: string }>(), {
   title: '应用程序'
@@ -88,27 +110,62 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #fff;
+  background-color: var(--el-bg-color, #fff);
+  color: var(--el-text-color-primary, #303133);
+  height: 36px;
   width: 100%;
-  box-shadow: 0 0.1rem 0.1rem rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
+  user-select: none;
+  z-index: 1000;
+}
+
+.brand {
+  -webkit-app-region: drag;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 6px;
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: $themeBase;
+  }
 }
 
 .title {
   -webkit-app-region: drag;
-  flex-grow: 2;
-  text-align: left;
-  padding: 0.5rem;
-  box-sizing: border-box;
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: var(--el-text-color-regular, #606266);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 8px;
+}
+
+.actions {
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+
+  &__plugin-item {
+    margin-right: 4px;
+  }
 }
 
 .options {
-  -webkit-app-region: no-drag;
   display: flex;
-  justify-content: space-around;
   align-items: center;
 
   .options__item {
-    margin-right: 0.3rem;
+    margin-right: 4px;
   }
 }
 </style>
