@@ -6,6 +6,21 @@
         <span class="sub-desc">
           已安装 {{ allPlugins.length }} 个插件，已启用 {{ activeCount }} 个
         </span>
+        <div v-if="activeTab === 'installed'" class="batch-actions">
+          <el-button size="small" @click="enableAllPlugins">全部启用</el-button>
+          <el-button size="small" @click="disableAllPlugins">全部停用</el-button>
+          <el-button size="small" type="primary" plain @click="exportPluginBackup">
+            备份数据
+          </el-button>
+          <el-button size="small" @click="triggerImportFile">恢复数据</el-button>
+          <input
+            ref="fileInputRef"
+            type="file"
+            accept=".json"
+            style="display: none"
+            @change="handleFileChange"
+          />
+        </div>
       </div>
       <div class="header-right">
         <el-radio-group v-model="activeTab" style="margin-right: 16px">
@@ -121,6 +136,16 @@
           <el-radio-button value="devtools">🛠️ 开发利器</el-radio-button>
           <el-radio-button value="utilities">🧰 实用工具</el-radio-button>
         </el-radio-group>
+
+        <div class="sort-select">
+          <span class="sort-label">排序方式:</span>
+          <el-select v-model="marketSortBy" size="small" style="width: 140px">
+            <el-option label="默认推荐" value="default" />
+            <el-option label="最多星标 ⭐" value="stars" />
+            <el-option label="最多下载 📥" value="downloads" />
+            <el-option label="名称排序 A-Z" value="name" />
+          </el-select>
+        </div>
       </div>
 
       <div v-if="filteredMarketplace.length > 0" class="plugins-grid">
@@ -227,7 +252,9 @@ import {
 const router = useRouter()
 const activeTab = ref<'installed' | 'marketplace'>('installed')
 const marketCategory = ref<string>('all')
+const marketSortBy = ref<'default' | 'stars' | 'downloads' | 'name'>('default')
 const searchKeyword = ref('')
+const fileInputRef = ref<HTMLInputElement | null>(null)
 const settingsDialogVisible = ref(false)
 const currentSettingsPluginId = ref('')
 const currentSettingsPluginTitle = ref('')
@@ -235,6 +262,91 @@ const currentSettingsComponent = shallowRef<any>(null)
 
 const allPlugins = computed(() => pluginManager.allPlugins.value)
 const activeCount = computed(() => allPlugins.value.filter((p) => p.enabled).length)
+
+const enableAllPlugins = async () => {
+  for (const p of allPlugins.value) {
+    if (!p.enabled) {
+      await pluginManager.enable(p.metadata.id)
+    }
+  }
+  ElMessage.success('已批量启用所有插件')
+}
+
+const disableAllPlugins = async () => {
+  for (const p of allPlugins.value) {
+    if (p.enabled) {
+      await pluginManager.disable(p.metadata.id)
+    }
+  }
+  ElMessage.info('已批量停用所有插件')
+}
+
+const exportPluginBackup = () => {
+  const backupData: Record<string, any> = {
+    timestamp: Date.now(),
+    version: '2.0.0',
+    enabledMap: {} as Record<string, boolean>,
+    localStorages: {} as Record<string, string>
+  }
+
+  for (const p of allPlugins.value) {
+    backupData.enabledMap[p.metadata.id] = p.enabled
+  }
+
+  if (typeof localStorage !== 'undefined') {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (k && (k.startsWith('LEAN_') || k.startsWith('PLUGIN_'))) {
+        backupData.localStorages[k] = localStorage.getItem(k) || ''
+      }
+    }
+  }
+
+  const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `lean-plugins-backup-${Date.now()}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+  ElMessage.success('插件配置与持久化数据已导出备份')
+}
+
+const triggerImportFile = () => {
+  fileInputRef.value?.click()
+}
+
+const handleFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = async (evt) => {
+    try {
+      const data = JSON.parse(evt.target?.result as string)
+      if (data.enabledMap) {
+        for (const [id, state] of Object.entries(data.enabledMap)) {
+          if (state) {
+            await pluginManager.enable(id)
+          } else {
+            await pluginManager.disable(id)
+          }
+        }
+      }
+      if (data.localStorages && typeof localStorage !== 'undefined') {
+        for (const [k, v] of Object.entries(data.localStorages)) {
+          localStorage.setItem(k, v as string)
+        }
+      }
+      ElMessage.success('插件数据已成功恢复！')
+    } catch {
+      ElMessage.error('无效的备份文件')
+    }
+  }
+  reader.readAsText(file)
+  target.value = ''
+}
 
 const filteredPlugins = computed(() => {
   const kw = searchKeyword.value.trim().toLowerCase()
@@ -250,7 +362,7 @@ const filteredPlugins = computed(() => {
 
 const filteredMarketplace = computed(() => {
   const kw = searchKeyword.value.trim().toLowerCase()
-  return marketplaceCatalog.filter((item) => {
+  let list = marketplaceCatalog.filter((item) => {
     const matchesCat = marketCategory.value === 'all' || item.category === marketCategory.value
     if (!matchesCat) return false
     if (!kw) return true
@@ -260,6 +372,21 @@ const filteredMarketplace = computed(() => {
       item.tags.some((t) => t.toLowerCase().includes(kw))
     )
   })
+
+  // 多维排序
+  if (marketSortBy.value === 'stars') {
+    list = [...list].sort((a, b) => b.stars - a.stars)
+  } else if (marketSortBy.value === 'downloads') {
+    const parseDl = (s: string) => {
+      const n = parseFloat(s)
+      return s.includes('k') ? n * 1000 : n
+    }
+    list = [...list].sort((a, b) => parseDl(b.downloads) - parseDl(a.downloads))
+  } else if (marketSortBy.value === 'name') {
+    list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'))
+  }
+
+  return list
 })
 
 const isInstalled = (id: string) => isPluginInstalled(id)
@@ -334,6 +461,12 @@ function openPluginView(pluginId: string) {
     color: var(--el-text-color-secondary, #909399);
   }
 
+  .batch-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
   .header-right {
     display: flex;
     align-items: center;
@@ -342,6 +475,21 @@ function openPluginView(pluginId: string) {
 
 .marketplace-categories {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  .sort-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .sort-label {
+      font-size: 12px;
+      color: var(--el-text-color-regular, #606266);
+    }
+  }
 }
 
 .plugins-grid {
