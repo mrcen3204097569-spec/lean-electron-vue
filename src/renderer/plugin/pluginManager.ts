@@ -252,6 +252,20 @@ class PluginManager {
     return record.enabled ? this.disable(pluginId) : this.enable(pluginId)
   }
 
+  hasPlugin(pluginId: string): boolean {
+    return this.records.has(pluginId)
+  }
+
+  async unregister(pluginId: string): Promise<boolean> {
+    const record = this.records.get(pluginId)
+    if (!record) return false
+    if (record.enabled) {
+      await this.disable(pluginId)
+    }
+    this.records.delete(pluginId)
+    return true
+  }
+
   getPlugin(pluginId: string): PluginDefinition | undefined {
     return this.records.get(pluginId)?.definition
   }

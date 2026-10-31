@@ -8,13 +8,18 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true,
-    "types": ["node"]
+    "types": ["node", "vite/client"],
+    "paths": {
+      "@/*": ["./src/renderer/*"]
+    }
   },
   "include": [
     "vite.config.mts",
     "vitest.config.mts",
     "plugins/**/*.mts",
     "config/**/*.mts",
-    "tests/**/*.ts"
+    "tests/**/*.ts",
+    "src/renderer/types/**/*.d.ts",
+    "src/renderer/auto-imports.d.ts"
   ]
 }

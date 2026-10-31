@@ -1,3 +1,5 @@
+import { ref } from 'vue'
+
 export type ThemeMode = 'auto' | 'light' | 'dark'
 
 const THEME_STORAGE_KEY = 'lean_app_theme_mode'
