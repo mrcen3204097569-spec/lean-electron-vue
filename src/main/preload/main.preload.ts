@@ -62,7 +62,9 @@ const electronSystemApi: ElectronSystemApi = {
     ipcRenderer.invoke(IpcChannel.notificationShow, options),
   getLoginItemSettings: () => ipcRenderer.invoke(IpcChannel.systemGetLoginItem),
   setLoginItemSettings: (openAtLogin: boolean) =>
-    ipcRenderer.invoke(IpcChannel.systemSetLoginItem, openAtLogin)
+    ipcRenderer.invoke(IpcChannel.systemSetLoginItem, openAtLogin),
+  getCloseToTray: () => ipcRenderer.invoke(IpcChannel.trayGetCloseToTray),
+  setCloseToTray: (enabled: boolean) => ipcRenderer.invoke(IpcChannel.traySetCloseToTray, enabled)
 }
 
 contextBridge.exposeInMainWorld('electronAppUpdateApi', electronAppUpdateApi)

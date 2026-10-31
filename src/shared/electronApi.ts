@@ -25,7 +25,9 @@ export const IpcChannel = {
   clipboardWrite: 'clipboard-write',
   notificationShow: 'notification-show',
   systemGetLoginItem: 'system-get-login-item',
-  systemSetLoginItem: 'system-set-login-item'
+  systemSetLoginItem: 'system-set-login-item',
+  traySetCloseToTray: 'tray-set-close-to-tray',
+  trayGetCloseToTray: 'tray-get-close-to-tray'
 } as const
 
 export interface DownloadProgressInfo {
@@ -126,4 +128,6 @@ export interface ElectronSystemApi {
   showNotification: (options: NotificationOptions) => Promise<boolean>
   getLoginItemSettings: () => Promise<{ openAtLogin: boolean }>
   setLoginItemSettings: (openAtLogin: boolean) => Promise<void>
+  getCloseToTray: () => Promise<boolean>
+  setCloseToTray: (enabled: boolean) => Promise<void>
 }
