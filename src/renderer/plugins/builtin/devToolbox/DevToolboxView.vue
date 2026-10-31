@@ -1,11 +1,15 @@
 <template>
   <div class="dev-toolbox-view">
     <div class="view-header">
-      <h2>开发者工具箱</h2>
+      <div class="header-left">
+        <h2>开发者全能工具箱 (Developer Toolbox Suite)</h2>
+        <span class="sub-title">15+ 款离线原生高效开发实用工具矩阵</span>
+      </div>
+      <el-tag type="success" size="small">极速离线运算</el-tag>
     </div>
 
-    <el-tabs v-model="activeTab" type="border-card">
-      <!-- Tab 1: JSON 格式化 -->
+    <el-tabs v-model="activeTab" type="border-card" class="toolbox-tabs">
+      <!-- 常用编解码与转换 -->
       <el-tab-pane label="JSON 格式化" name="json">
         <div class="tool-pane">
           <div class="action-bar">
@@ -23,7 +27,48 @@
         </div>
       </el-tab-pane>
 
-      <!-- Tab 2: 时间戳转换 -->
+      <el-tab-pane label="Diff 文本比对" name="diff">
+        <div class="tool-pane">
+          <DiffTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="Regex 正则演练" name="regex">
+        <div class="tool-pane">
+          <RegexTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="哈希散列计算" name="hash">
+        <div class="tool-pane">
+          <HashTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="安全密码生成" name="password">
+        <div class="tool-pane">
+          <PasswordTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="UUID / ID 生成" name="uuid">
+        <div class="tool-pane">
+          <UuidTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="JWT 令牌剖析" name="jwt">
+        <div class="tool-pane">
+          <JwtTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="URL / Query 解析" name="url">
+        <div class="tool-pane">
+          <UrlTool />
+        </div>
+      </el-tab-pane>
+
       <el-tab-pane label="时间戳转换" name="timestamp">
         <div class="tool-pane">
           <div class="timestamp-section">
@@ -62,7 +107,6 @@
         </div>
       </el-tab-pane>
 
-      <!-- Tab 3: Base64 编解码 -->
       <el-tab-pane label="Base64 编解码" name="base64">
         <div class="tool-pane">
           <div class="action-bar">
@@ -91,18 +135,61 @@
           </el-row>
         </div>
       </el-tab-pane>
+
+      <el-tab-pane label="色彩格式转换" name="color">
+        <div class="tool-pane">
+          <ColorTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="命名风格转换" name="case">
+        <div class="tool-pane">
+          <CaseTextTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="CSS 渐变与阴影" name="css">
+        <div class="tool-pane">
+          <CssVisualizerTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="HTML 实体编码" name="html">
+        <div class="tool-pane">
+          <HtmlEntityTool />
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="临时草稿纸" name="scratchpad">
+        <div class="tool-pane">
+          <ScratchpadTool />
+        </div>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 
 <script lang="ts" setup name="DevToolboxView">
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import DiffTool from './tools/DiffTool.vue'
+import RegexTool from './tools/RegexTool.vue'
+import HashTool from './tools/HashTool.vue'
+import PasswordTool from './tools/PasswordTool.vue'
+import UuidTool from './tools/UuidTool.vue'
+import JwtTool from './tools/JwtTool.vue'
+import UrlTool from './tools/UrlTool.vue'
+import ColorTool from './tools/ColorTool.vue'
+import CaseTextTool from './tools/CaseTextTool.vue'
+import CssVisualizerTool from './tools/CssVisualizerTool.vue'
+import HtmlEntityTool from './tools/HtmlEntityTool.vue'
+import ScratchpadTool from './tools/ScratchpadTool.vue'
 
 const activeTab = ref('json')
 
 // JSON
 const jsonInput = ref(
-  '{"name":"lean-electron-vue","version":"2.0.0","plugins":["monitor","notes"]}'
+  '{"name":"lean-electron-vue","version":"2.0.0","features":["plugin-system","dev-toolbox","multi-window"]}'
 )
 
 function formatJson() {
@@ -200,21 +287,33 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .dev-toolbox-view {
-  padding: 20px;
+  padding: 16px;
 }
 
 .view-header {
-  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 
-  h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .sub-title {
+      font-size: 12px;
+      color: var(--el-text-color-secondary, #909399);
+    }
   }
 }
 
 .tool-pane {
-  padding: 10px 0;
+  padding: 6px 0;
 }
 
 .action-bar {
