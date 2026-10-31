@@ -7,17 +7,22 @@
     <div class="main-body">
       <SystemSidebar v-if="!isDialogMode" />
 
-      <main class="content-container">
-        <router-view v-slot="{ Component }" class="router-view">
-          <transition
-            enter-active-class="animate__animated animate__fadeIn"
-            leave-active-class="animate__animated animate__fadeOut"
-            mode="out-in"
-          >
-            <component :is="Component" class="component" />
-          </transition>
-        </router-view>
-      </main>
+      <div class="content-wrapper">
+        <!-- 顶部标签页工作台 (TabBar) -->
+        <SystemTabBar v-if="!isDialogMode" />
+
+        <main class="content-container">
+          <router-view v-slot="{ Component }" class="router-view">
+            <transition
+              enter-active-class="animate__animated animate__fadeIn"
+              leave-active-class="animate__animated animate__fadeOut"
+              mode="out-in"
+            >
+              <component :is="Component" class="component" />
+            </transition>
+          </router-view>
+        </main>
+      </div>
     </div>
 
     <!-- 底部状态栏 -->
@@ -37,6 +42,7 @@
 <script setup lang="ts">
 import SystemBarTop from '@/components/system/SystemBarTop.vue'
 import SystemSidebar from '@/components/system/SystemSidebar.vue'
+import SystemTabBar from '@/components/system/SystemTabBar.vue'
 import SystemBarBottom from '@/components/system/SystemBarBottom.vue'
 import SystemAppUpdate from '@/components/system/SystemAppUpdate.vue'
 import SystemWindowShow from '@/components/system/SystemWindowShow.vue'
@@ -79,6 +85,14 @@ onUnmounted(() => {
   display: flex;
   overflow: hidden;
   position: relative;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
 }
 
 .content-container {
