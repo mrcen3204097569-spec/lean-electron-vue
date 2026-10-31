@@ -16,6 +16,17 @@ if (!app.isPackaged) {
   process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 }
 
+// 主进程异常兜底，防止意外崩溃并持久化错误日志
+process.on('uncaughtException', (error) => {
+  console.error('[Main] Uncaught Exception:', error)
+  LogManage.log(`[主进程未捕获异常] ${error?.stack || error?.message || error}`)
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Main] Unhandled Rejection:', reason)
+  LogManage.log(`[主进程未处理的 Promise 拒绝] ${reason}`)
+})
+
 let mainWindow: BrowserWindow | undefined
 
 function focusMainWindow() {

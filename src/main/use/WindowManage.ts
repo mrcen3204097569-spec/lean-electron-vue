@@ -105,11 +105,10 @@ function attachNavigationGuards(contents: WebContents) {
     return {
       action: 'allow',
       overrideBrowserWindowOptions,
-      createWindow: () => {
-        // Electron 会从 features 里再解析一份窗口选项（alwaysOnTop、transparent、
-        // webviewTag 等）。没被 override 覆盖的字段会留在合并结果里，所以这里
-        // 只使用白名单结果，不把合并后的 options 传给 BrowserWindow。
+      createWindow: (options) => {
+        // 必须继承传入的 options 以连接 Electron 预创建的 guest webContents
         const child = new BrowserWindow({
+          ...options,
           ...overrideBrowserWindowOptions,
           alwaysOnTop: false,
           transparent: false,
