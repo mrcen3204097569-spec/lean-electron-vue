@@ -23,8 +23,11 @@ This template doesn't use a third-party integration such as `electron-vite` or `
 
 - ⚡️ **Vite 8 + Vue 3.5 + TypeScript** with `<script setup>` and blazing fast HMR
 - 🧩 **Built-in Plugin System Engine**: supports plugin lifecycles (`setup` / `teardown`), isolated storage, dynamic route injection, status bar widgets, command extension registration, and dedicated settings dialogs
+- 🌐 **Plugin Marketplace & Community Store**: dynamic hot-loading, one-click install/uninstall for community plugins (Pomodoro Timer, Clipboard History, Color Palette, and REST API Client)
 - 🔍 **Raycast-style Command Palette (`Ctrl+K` / `Cmd+K`)**: instant fuzzy search, route jumping, system actions, and aggregated plugin commands
+- ⌨️ **Keyboard Shortcuts Cheat Sheet (`Ctrl+/` / `Cmd+/`)**: searchable interactive cheat sheet overlay for window actions, navigation, and plugin shortcuts
 - 🗂️ **Multi-Tab Workspace (TabBar)**: IDE-like top tabs, route history tracking, pinned home tab, and batch close actions
+- 🎵 **Synthetic Audio Feedback Engine (Web Audio)**: zero-dependency programmatic sound effects (click, toggle, success, alert) with customizable toggles
 - ⚙️ **Obsidian-style Plugin Settings Modal**: declare custom `settingsComponent` per plugin with isolated persistent storage
 - 🖥️ **Modern Desktop Shell**: collapsible sidebar, bottom status bar, and frameless custom titlebar
 - 🌓 **Full Dark & Light Themes**: seamless switching between Light, Dark, and System Auto modes with Element Plus integration
