@@ -22,9 +22,14 @@
 ## 特性
 
 - ⚡️ **Vite 8 + Vue 3.5 + TypeScript**，`<script setup>` 写法，秒级极速热重载
-- 🧩 **原生插件化架构 (Plugin Engine)**：支持插件生命周期（`setup` / `teardown`）、独立存储空间、动态路由注入、状态栏部件挂载与顶部快捷操作注入
+- 🧩 **原生插件化架构 (Plugin Engine)**：支持插件生命周期（`setup` / `teardown`）、独立存储空间、动态路由注入、状态栏部件挂载、命令指令注册与专属配置面板
+- 🔍 **Raycast 风格全局命令面板 (`Ctrl+K` / `Cmd+K`)**：毫秒级模糊检索、全应用页面极速直达、系统级快捷功能触发与插件自定义指令动态聚合
+- 🗂️ **多标签页工作台 (TabBar)**：类 IDE 顶部多标签栏、路由访问历史追踪、Pin 固定首页、右键快捷批量关闭
+- ⚙️ **Obsidian 风格插件独立配置面板**：插件可声明专属 `settingsComponent`，支持在插件中心一键弹出配置弹窗，配置直接落入插件隔离存储
 - 🖥️ **现代桌面工作台 Shell**：可折叠侧边导航栏、底部实时状态栏、无边框顶部拖曳标题栏
 - 🌓 **全套暗黑/明亮主题**：支持浅色模式、深色模式与跟随系统自动切换，Element Plus 全局深度适配
+- ⌨️ **系统级全局快捷键**：默认注册 `CommandOrControl+Shift+Space` 一键呼出/隐藏前台窗口，支持主进程与渲染进程动态注册
+- 📐 **跨会话窗口记忆与跨屏自愈**：持久化记录窗口尺寸与坐标，支持拔插显示器或多屏越界时智能居中自愈
 - 📥 **系统托盘 (Tray)**：常驻系统托盘图标、右键菜单、单击唤醒与退出时最小化到托盘保护
 - 🛠️ **丰富系统级能力 IPC**：原生打开/保存文件对话框、文件夹选择、系统剪贴板读写、原生通知、开机自启配置
 - 🧰 **内置三大演示插件**：实时硬件运行监控、桌面快捷便签、开发者常用工具箱
@@ -195,6 +200,7 @@ import { markRaw } from 'vue'
 import { definePlugin } from '@/plugin/pluginManager'
 import MyWidget from './MyWidget.vue'
 import MyPageView from './MyPageView.vue'
+import MySettingsView from './MySettingsView.vue'
 
 export const myCustomPlugin = definePlugin({
   metadata: {
@@ -204,7 +210,10 @@ export const myCustomPlugin = definePlugin({
     description: '演示如何在模板中注册独立扩展',
     author: 'Developer'
   },
-  // 1. 声明式扩展点
+  // 1. 专属配置组件 (Obsidian 风格)
+  settingsComponent: markRaw(MySettingsView),
+
+  // 2. 声明式扩展点
   extensions: {
     views: [
       {
@@ -228,9 +237,18 @@ export const myCustomPlugin = definePlugin({
         title: '快捷功能',
         action: () => alert('点击了插件快捷按钮')
       }
+    ],
+    commands: [
+      {
+        id: 'my-command.action',
+        title: '快速执行插件任务',
+        category: '演示插件',
+        shortcut: 'Ctrl+Shift+M',
+        action: () => console.log('执行插件指令')
+      }
     ]
   },
-  // 2. 编程式生命周期
+  // 3. 编程式生命周期
   setup(ctx) {
     // 插件独立隔离存储
     ctx.storage.set('installedAt', Date.now())
