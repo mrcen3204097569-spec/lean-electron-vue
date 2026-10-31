@@ -40,7 +40,7 @@
     "axios": "^1.20.0",
     "electron": "^45.0.0",
     "electron-builder": "^26.15.3",
-    "electron-updater": "^6.8.9",
+    "electron-updater": "^6.8.11",
     "element-plus": "^2.14.7",
     "esbuild": "^0.28.2",
     "eslint": "^10.13.0",
