@@ -1,5 +1,6 @@
 import { markRaw } from 'vue'
 import { definePlugin } from '@/plugin/pluginManager'
+import { router } from '@/router'
 import QuickNotesView from './QuickNotesView.vue'
 
 export const quickNotesPlugin = definePlugin({
@@ -21,6 +22,17 @@ export const quickNotesPlugin = definePlugin({
         component: markRaw(QuickNotesView),
         inNavigation: true,
         order: 20
+      }
+    ],
+    commands: [
+      {
+        id: 'quick-notes.open',
+        title: '打开桌面快捷便签',
+        category: '快捷便签',
+        shortcut: 'Alt+N',
+        action: () => {
+          router.push('/plugins/quick-notes')
+        }
       }
     ]
   }

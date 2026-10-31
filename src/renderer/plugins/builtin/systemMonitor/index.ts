@@ -1,5 +1,6 @@
 import { markRaw } from 'vue'
 import { definePlugin } from '@/plugin/pluginManager'
+import { router } from '@/router'
 import SystemMonitorView from './SystemMonitorView.vue'
 import SystemStatusWidget from './SystemStatusWidget.vue'
 
@@ -30,6 +31,17 @@ export const systemMonitorPlugin = definePlugin({
         alignment: 'left',
         order: 10,
         component: markRaw(SystemStatusWidget)
+      }
+    ],
+    commands: [
+      {
+        id: 'system-monitor.open',
+        title: '打开系统硬件监控看板',
+        category: '系统监控',
+        shortcut: 'Alt+M',
+        action: () => {
+          router.push('/plugins/system-monitor')
+        }
       }
     ]
   }

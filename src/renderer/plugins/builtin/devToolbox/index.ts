@@ -1,5 +1,6 @@
 import { markRaw } from 'vue'
 import { definePlugin } from '@/plugin/pluginManager'
+import { router } from '@/router'
 import DevToolboxView from './DevToolboxView.vue'
 
 export const devToolboxPlugin = definePlugin({
@@ -21,6 +22,17 @@ export const devToolboxPlugin = definePlugin({
         component: markRaw(DevToolboxView),
         inNavigation: true,
         order: 30
+      }
+    ],
+    commands: [
+      {
+        id: 'dev-toolbox.open',
+        title: '打开开发者工具箱',
+        category: '开发者工具',
+        shortcut: 'Alt+D',
+        action: () => {
+          router.push('/plugins/dev-toolbox')
+        }
       }
     ]
   }

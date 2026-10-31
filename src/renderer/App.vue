@@ -28,6 +28,9 @@
 
     <!-- 主窗口就绪显示通知组件 -->
     <SystemWindowShow />
+
+    <!-- 全局命令面板 (Ctrl+K) -->
+    <CommandPalette />
   </div>
 </template>
 
@@ -37,6 +40,7 @@ import SystemSidebar from '@/components/system/SystemSidebar.vue'
 import SystemBarBottom from '@/components/system/SystemBarBottom.vue'
 import SystemAppUpdate from '@/components/system/SystemAppUpdate.vue'
 import SystemWindowShow from '@/components/system/SystemWindowShow.vue'
+import CommandPalette from '@/components/system/CommandPalette.vue'
 
 const route = useRoute()
 

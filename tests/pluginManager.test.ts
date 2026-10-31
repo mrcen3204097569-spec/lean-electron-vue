@@ -96,4 +96,41 @@ describe('PluginManager Engine', () => {
     pluginManager.register(storagePlugin)
     expect(capturedPayload).toEqual({ msg: 'ok' })
   })
+
+  it('registers and exposes command extensions correctly', async () => {
+    const cmdAction = vi.fn()
+    const commandPlugin = definePlugin({
+      metadata: {
+        id: 'test-commands',
+        name: '指令扩展测试',
+        version: '1.0.0',
+        description: '测试'
+      },
+      extensions: {
+        commands: [
+          {
+            id: 'test.run',
+            title: '测试命令',
+            category: '测试分类',
+            shortcut: 'Ctrl+Shift+T',
+            action: cmdAction
+          }
+        ]
+      }
+    })
+
+    pluginManager.register(commandPlugin)
+    const foundCmd = pluginManager.activeCommands.value.find((c) => c.id === 'test.run')
+    expect(foundCmd).toBeDefined()
+    expect(foundCmd?.title).toBe('测试命令')
+
+    // 执行命令
+    foundCmd?.action()
+    expect(cmdAction).toHaveBeenCalled()
+
+    // 停用插件后指令应被移除
+    await pluginManager.disable('test-commands')
+    const disabledCmd = pluginManager.activeCommands.value.find((c) => c.id === 'test.run')
+    expect(disabledCmd).toBeUndefined()
+  })
 })

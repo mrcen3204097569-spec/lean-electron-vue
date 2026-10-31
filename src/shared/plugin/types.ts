@@ -37,10 +37,20 @@ export interface PluginHeaderActionExtension {
   action: () => void
 }
 
+export interface PluginCommandExtension {
+  id: string
+  title: string
+  category?: string
+  shortcut?: string
+  icon?: Component | string
+  action: () => void | Promise<void>
+}
+
 export interface PluginExtension {
   views?: PluginViewExtension[]
   statusBarItems?: PluginStatusBarExtension[]
   headerActions?: PluginHeaderActionExtension[]
+  commands?: PluginCommandExtension[]
 }
 
 export interface PluginStorage {
@@ -56,6 +66,7 @@ export interface PluginContext {
   registerView: (view: PluginViewExtension) => void
   registerStatusBarItem: (item: PluginStatusBarExtension) => void
   registerHeaderAction: (action: PluginHeaderActionExtension) => void
+  registerCommand: (command: PluginCommandExtension) => void
   emit: (event: string, payload?: unknown) => void
   on: (event: string, handler: (payload?: unknown) => void) => () => void
 }
@@ -74,6 +85,7 @@ export interface PluginRuntimeRecord {
     views: PluginViewExtension[]
     statusBarItems: PluginStatusBarExtension[]
     headerActions: PluginHeaderActionExtension[]
+    commands: PluginCommandExtension[]
   }
   removeRouteCallbacks: Map<string, () => void>
 }

@@ -1,6 +1,7 @@
 import { reactive, computed, markRaw } from 'vue'
 import type { Router } from 'vue-router'
 import type {
+  PluginCommandExtension,
   PluginContext,
   PluginDefinition,
   PluginHeaderActionExtension,
@@ -107,6 +108,10 @@ class PluginManager {
         if (!record.enabled) return
         record.activeExtensions.headerActions.push(action)
       },
+      registerCommand: (cmd: PluginCommandExtension) => {
+        if (!record.enabled) return
+        record.activeExtensions.commands.push(cmd)
+      },
       emit: (event: string, payload?: unknown) => {
         const handlers = this.eventHandlers.get(event)
         if (handlers) {
@@ -148,7 +153,8 @@ class PluginManager {
       activeExtensions: {
         views: [],
         statusBarItems: [],
-        headerActions: []
+        headerActions: [],
+        commands: []
       },
       removeRouteCallbacks: new Map()
     }
@@ -182,6 +188,11 @@ class PluginManager {
       if (record.definition.extensions.headerActions) {
         for (const action of record.definition.extensions.headerActions) {
           ctx.registerHeaderAction(action)
+        }
+      }
+      if (record.definition.extensions.commands) {
+        for (const cmd of record.definition.extensions.commands) {
+          ctx.registerCommand(cmd)
         }
       }
     }
@@ -228,6 +239,7 @@ class PluginManager {
     record.activeExtensions.views = []
     record.activeExtensions.statusBarItems = []
     record.activeExtensions.headerActions = []
+    record.activeExtensions.commands = []
     record.enabled = false
 
     this.savePersistedEnabledState()
@@ -290,6 +302,16 @@ class PluginManager {
       }
     }
     return actions.sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+  })
+
+  readonly activeCommands = computed(() => {
+    const commands: PluginCommandExtension[] = []
+    for (const record of this.records.values()) {
+      if (record.enabled) {
+        commands.push(...record.activeExtensions.commands)
+      }
+    }
+    return commands
   })
 }
 
