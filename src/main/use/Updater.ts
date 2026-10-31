@@ -19,8 +19,11 @@ export class Updater {
 
     // 监听开始下载操作
     ipcMain.handle(IpcChannel.appDownStart, async () => {
-      // 开始下载
-      await autoUpdater.downloadUpdate()
+      try {
+        await autoUpdater.downloadUpdate()
+      } catch (err) {
+        LogManage.log(`下载更新失败：${err}`)
+      }
     })
 
     // 监听安装操作
@@ -30,17 +33,23 @@ export class Updater {
 
     // 监听验证更新结果
     autoUpdater.on('update-available', (info) => {
-      mainWindow.webContents.send(IpcChannel.appValidateUpdateNotice, info)
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send(IpcChannel.appValidateUpdateNotice, info)
+      }
     })
 
     // 监听包下载状态
     autoUpdater.on('download-progress', (info) => {
-      mainWindow.webContents.send(IpcChannel.appDownProgress, info)
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send(IpcChannel.appDownProgress, info)
+      }
     })
 
     // 下载完成
     autoUpdater.on('update-downloaded', (info) => {
-      mainWindow.webContents.send(IpcChannel.appDownComplete, info)
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send(IpcChannel.appDownComplete, info)
+      }
     })
 
     // 更新出错

@@ -7,7 +7,7 @@ import { ElMessage } from 'element-plus'
  * 错误信息处理
  * @param {string} message
  */
-const errorHandel = (message: string) => {
+const errorHandler = (message: string) => {
   ElMessage.error(message)
 }
 
@@ -15,24 +15,25 @@ const errorHandel = (message: string) => {
 const instance = axios.create(<CreateAxiosDefaults>{
   timeout: 30 * 1000,
   withCredentials: true, // 允许axios发送请求时携带凭证
-  baseURL: ''
+  baseURL: import.meta.env.VITE_API_BASE_URL || ''
 })
-
-// 设置 post 请求头 Content-Type 格式
-instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 
 // 拦截器
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // post 请求格式化参数
-    if (config.method?.toUpperCase() === 'POST') {
+    // 仅在显式声明 urlencoded 且非 FormData 时格式化参数
+    if (
+      config.method?.toUpperCase() === 'POST' &&
+      !(config.data instanceof FormData) &&
+      config.headers?.['Content-Type']?.toString().includes('application/x-www-form-urlencoded')
+    ) {
       config.data = qs.stringify(config.data)
     }
     return config
   },
   // 错误请求
   (error: any) => {
-    errorHandel(typeof error === 'string' ? error : JSON.stringify(error))
+    errorHandler(typeof error === 'string' ? error : JSON.stringify(error))
     return Promise.reject(error)
   }
 )
@@ -50,15 +51,14 @@ instance.interceptors.response.use(
     const { response } = error
     if (response) {
       // 请求已发出，但是不在2xx的范围
-      errorHandel(response.data.message)
+      const message =
+        response.data?.message || response.data?.error || response.statusText || '请求出错'
+      errorHandler(typeof message === 'string' ? message : JSON.stringify(message))
       return Promise.reject(response)
     } else {
       // 处理断网的情况
-      // eg:请求超时或断网时，更新state的network状态
-      // network状态在app.vue中控制着一个全局的断网提示组件的显示隐藏
-      // 关于断网组件中的刷新重新获取数据，会在断网组件中说明
       if (!window.navigator.onLine) {
-        errorHandel('网络已断开连接，请重新连接您的网络')
+        errorHandler('网络已断开连接，请重新连接您的网络')
       } else {
         return Promise.reject(error)
       }

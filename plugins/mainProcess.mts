@@ -6,6 +6,7 @@ const sharedOptions = {
   format: 'cjs',
   target: 'node22',
   outdir: './dist/',
+  outbase: './src/main',
   external: ['electron']
 } satisfies BuildOptions
 

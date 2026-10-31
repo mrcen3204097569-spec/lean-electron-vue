@@ -28,8 +28,13 @@ function isRegularFile(filePath: string): boolean {
  * 自定义协议，便于在生产环境中加载html or 其他文件
  */
 export class CustomScheme {
+  private static registered = false
+
   // 注册自定义app协议
   static registerScheme() {
+    if (CustomScheme.registered) return
+    CustomScheme.registered = true
+
     protocol.handle('app', (request) => {
       let pathName: string
       try {

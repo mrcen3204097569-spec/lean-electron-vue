@@ -1,6 +1,8 @@
 <template>
   <div class="c-system-bar-top">
-    <div class="title">{{ title }}</div>
+    <div class="title" @dblclick="windowIsMax ? restoreWindow() : maximizeWindow()">
+      {{ title }}
+    </div>
 
     <div class="options">
       <div class="options__item minimize">
@@ -100,6 +102,7 @@ onUnmounted(() => {
 }
 
 .options {
+  -webkit-app-region: no-drag;
   display: flex;
   justify-content: space-around;
   align-items: center;

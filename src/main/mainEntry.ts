@@ -85,7 +85,7 @@ app.whenReady().then(async () => {
   Updater.regUpdateEvent(win)
 
   // 注册调试 log
-  LogManage.regMainWidow(win)
+  LogManage.regMainWindow(win)
 
   // 窗口事件注册：ipcMain事件注册
   WindowManage.regWindowIpcMainEvent()

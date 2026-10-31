@@ -5,14 +5,21 @@ import { IpcChannel } from '../../shared/electronApi'
  * log
  */
 export class LogManage {
-  static mainWindow: BrowserWindow
+  static mainWindow?: BrowserWindow
 
   /**
    * 设置主窗口
    * @param win
    */
-  static regMainWidow(win: BrowserWindow) {
+  static regMainWindow(win: BrowserWindow) {
     LogManage.mainWindow = win
+  }
+
+  /**
+   * 兼容旧版方法名
+   */
+  static regMainWidow(win: BrowserWindow) {
+    LogManage.regMainWindow(win)
   }
 
   /**
@@ -20,7 +27,9 @@ export class LogManage {
    * @param text
    */
   static log(text: string) {
-    LogManage.mainWindow &&
+    console.log(`[electron-log] ${text}`)
+    if (LogManage.mainWindow && !LogManage.mainWindow.isDestroyed()) {
       LogManage.mainWindow.webContents.send(IpcChannel.electronLog, `electron-log：${text}`)
+    }
   }
 }

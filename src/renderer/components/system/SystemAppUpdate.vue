@@ -98,7 +98,7 @@ onMounted(() => {
     api.downProgress((info) => {
       console.log('下载中ing：', info)
       status.value = EUpdateStatus.DOWN_ING
-      downPercentage.value = info.percent
+      downPercentage.value = Math.min(100, Math.max(0, Math.round(info.percent)))
     })
   )
 

@@ -29,7 +29,7 @@ import SystemWindowShow from '@/components/system/SystemWindowShow.vue'
 const route = useRoute()
 
 const title = computed(() => {
-  return route.name as string
+  return (route.meta?.title as string) || (route.name as string) || '应用程序'
 })
 
 const stopLog = ref<(() => void) | null>(null)
@@ -46,13 +46,11 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .root {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  top: 0;
   width: 100vw;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .animate__animated {
@@ -61,21 +59,7 @@ onUnmounted(() => {
 
 .router-view {
   position: relative;
-  height: calc(100vh - 2rem);
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+  flex: 1;
+  overflow: auto;
 }
 </style>

@@ -6,22 +6,28 @@ const root = '/workspace/dist'
 
 describe('resolveAppFile', () => {
   it('serves index.html for the document and for extension-less routes', () => {
-    expect(resolveAppFile(root, '')).toBe(path.join(root, 'index.html'))
-    expect(resolveAppFile(root, '/')).toBe(path.join(root, 'index.html'))
-    expect(resolveAppFile(root, '/test')).toBe(path.join(root, 'index.html'))
-    expect(resolveAppFile(root, '/index.html')).toBe(path.join(root, 'index.html'))
+    expect(resolveAppFile(root, '', path.posix)).toBe(path.posix.join(root, 'index.html'))
+    expect(resolveAppFile(root, '/', path.posix)).toBe(path.posix.join(root, 'index.html'))
+    expect(resolveAppFile(root, '/test', path.posix)).toBe(path.posix.join(root, 'index.html'))
+    expect(resolveAppFile(root, '/index.html', path.posix)).toBe(
+      path.posix.join(root, 'index.html')
+    )
   })
 
   it('serves real files that stay inside the app directory', () => {
-    expect(resolveAppFile(root, '/assets/index.js')).toBe(path.join(root, 'assets/index.js'))
-    expect(resolveAppFile(root, '/./assets/a.js')).toBe(path.join(root, 'assets/a.js'))
+    expect(resolveAppFile(root, '/assets/index.js', path.posix)).toBe(
+      path.posix.join(root, 'assets/index.js')
+    )
+    expect(resolveAppFile(root, '/./assets/a.js', path.posix)).toBe(
+      path.posix.join(root, 'assets/a.js')
+    )
   })
 
   it('blocks paths that escape the app directory', () => {
-    expect(resolveAppFile(root, '/../../etc/passwd.txt')).toBeNull()
-    expect(resolveAppFile(root, 'foo/../../secret.js')).toBeNull()
-    expect(resolveAppFile(root, '/assets/../../outside.js')).toBeNull()
-    expect(resolveAppFile(root, '/ok.js\0.png')).toBeNull()
+    expect(resolveAppFile(root, '/../../etc/passwd.txt', path.posix)).toBeNull()
+    expect(resolveAppFile(root, 'foo/../../secret.js', path.posix)).toBeNull()
+    expect(resolveAppFile(root, '/assets/../../outside.js', path.posix)).toBeNull()
+    expect(resolveAppFile(root, '/ok.js\0.png', path.posix)).toBeNull()
   })
 
   it('blocks Windows drive and traversal paths', () => {
