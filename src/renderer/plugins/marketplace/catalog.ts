@@ -2,6 +2,7 @@ import type { PluginDefinition } from '../../../shared/plugin/types'
 import { pomodoroPlugin } from './pomodoro'
 import { clipboardPlugin } from './clipboard'
 import { colorPalettePlugin } from './colorPalette'
+import { apiClientPlugin } from './apiClient'
 
 export interface MarketplacePluginItem {
   id: string
@@ -56,5 +57,19 @@ export const marketplaceCatalog: MarketplacePluginItem[] = [
     category: 'devtools',
     tags: ['设计', '配色', 'WCAG'],
     definition: colorPalettePlugin
+  },
+  {
+    id: 'api-client',
+    name: 'REST API 接口调试器',
+    version: '1.0.0',
+    author: 'API Craft',
+    description:
+      '轻量极速的 HTTP / REST 接口演练场，支持请求头参数配置、JSON 格式化与响应体实时解析',
+    icon: 'Connection',
+    stars: 312,
+    downloads: '7.8k',
+    category: 'devtools',
+    tags: ['API', 'HTTP', '调试', '接口'],
+    definition: apiClientPlugin
   }
 ]

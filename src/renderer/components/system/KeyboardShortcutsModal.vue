@@ -159,6 +159,11 @@ const shortcutsData: ShortcutCategory[] = [
         name: '打开设计调色盘',
         keys: ['Alt', 'G'],
         action: () => router.push('/plugins/color-palette')
+      },
+      {
+        name: '打开 REST API 接口调试器',
+        keys: ['Alt', 'R'],
+        action: () => router.push('/plugins/api-client')
       }
     ]
   }
